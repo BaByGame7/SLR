@@ -1,981 +1,789 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
-  LayoutDashboard, FileText, ClipboardCheck, BookOpen, Search, Star,
-  MessageCircle, Bell, CheckCircle2, Circle, Clock, Users, Building2,
-  ShieldCheck, Upload, PenLine, Video, BarChart3, Plus, X, ChevronRight,
-  GraduationCap, UserCheck, Briefcase, Send, Sparkles, Download,
-  CalendarClock, AlertCircle, Paperclip, Check, Mail, Phone, MapPin,
+  LayoutDashboard, FileText, Building2, FolderOpen, Video, BarChart3,
+  Bell, MessageSquare, Settings, LogOut, Plus, ChevronRight, ChevronLeft,
+  Check, Search, Upload, Download, Star, ThumbsUp, ThumbsDown, Calendar,
+  Clock, MapPin, ExternalLink, Sparkles, Filter, Eye, AlertCircle,
+  GraduationCap, Users, BookOpen, ShieldCheck, X, ArrowRight, PenTool,
+  CheckCircle2, Circle, ClipboardList, Building, Mail, Phone, ImagePlus,
+  TrendingUp, FileCheck2, School
 } from "lucide-react";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell,
-} from "recharts";
 
-const T = {
-  navy: "#152238",
-  navyLight: "#1F3358",
-  navyPale: "#EAEEF5",
-  paper: "#F2F3F6",
+/* ============================== DESIGN TOKENS ==============================
+   Derived from the UniIntern Stitch spec: navy institutional palette,
+   Inter type, 4px/8px radius rhythm, soft tinted shadows.
+============================================================================ */
+const C = {
+  navy: "#1a365d",
+  navyDeep: "#0f2440",
+  primary: "#2B6CB0",
+  primaryDark: "#1e5490",
+  success: "#48BB78",
+  successBg: "#E6F7ED",
+  warning: "#ECC94B",
+  warningBg: "#FEF9E7",
+  error: "#E53E3E",
+  errorBg: "#FDEBEA",
+  bg: "#F7FAFC",
   card: "#FFFFFF",
-  gold: "#C69A3C",
-  goldDark: "#9C7A2C",
-  goldPale: "#F7EFDC",
-  green: "#2F8F6B",
-  greenPale: "#E5F3EC",
-  amber: "#C87F1E",
-  amberPale: "#FBF0DE",
-  red: "#B94A3F",
-  redPale: "#F8E9E7",
-  text: "#20263A",
-  muted: "#6D7488",
-  border: "#E2E4EA",
-};
-const FONT_DISPLAY = "'Noto Serif Thai', serif";
-const FONT_BODY = "'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-const FONT_MONO = "'IBM Plex Mono', monospace";
-
-const STAGES = [
-  { key: "submitted", label: "ยื่นคำร้อง" },
-  { key: "pending_advisor", label: "รออนุมัติ" },
-  { key: "approved", label: "อาจารย์อนุมัติ" },
-  { key: "document_issued", label: "เจ้าหน้าที่ออกหนังสือ" },
-  { key: "sent", label: "ส่งหนังสือแล้ว" },
-  { key: "accepted", label: "บริษัทตอบรับ" },
-];
-
-const ROLE_META = {
-  student: { label: "นักศึกษา", name: "สมหญิง ตั้งใจ", sub: "6432010099 · วิทยาการคอมพิวเตอร์", icon: GraduationCap },
-  advisor: { label: "อาจารย์นิเทศ", name: "อ.ดร.ปิยะ วัฒนกุล", sub: "ภาควิชาวิทยาการคอมพิวเตอร์", icon: UserCheck },
-  staff: { label: "เจ้าหน้าที่ฝึกงาน", name: "นภัสสร ยิ้มแย้ม", sub: "งานสหกิจศึกษาและฝึกงาน", icon: Briefcase },
-  hr: { label: "สถานประกอบการ (HR)", name: "บริษัท เอสซีจี จำกัด (มหาชน)", sub: "ฝ่ายทรัพยากรบุคคล", icon: Building2 },
+  border: "#E2E8F0",
+  text: "#181C1E",
+  textBody: "#2D3748",
+  textMuted: "#718096",
 };
 
-const NAV = {
-  student: [
-    { key: "dashboard", label: "ภาพรวม", icon: LayoutDashboard },
-    { key: "request", label: "ยื่นคำร้องฝึกงาน", icon: FileText },
-    { key: "status", label: "ติดตามสถานะ", icon: ClipboardCheck },
-    { key: "logbook", label: "Logbook", icon: BookOpen },
-    { key: "match", label: "ค้นหา & แนะนำบริษัท", icon: Search },
-    { key: "reviews", label: "รีวิวบริษัท", icon: Star },
-    { key: "chat", label: "แชทกับอาจารย์", icon: MessageCircle },
-  ],
-  advisor: [
-    { key: "queue", label: "คำร้องรออนุมัติ", icon: ClipboardCheck },
-    { key: "logbook", label: "ตรวจ Logbook", icon: BookOpen },
-    { key: "meetings", label: "นัดนิเทศออนไลน์", icon: Video },
-    { key: "chat", label: "แชทกับนักศึกษา", icon: MessageCircle },
-  ],
-  staff: [
-    { key: "overview", label: "ภาพรวมระบบ", icon: BarChart3 },
-    { key: "students", label: "ข้อมูลนักศึกษา", icon: Users },
-    { key: "documents", label: "สร้าง & ติดตามหนังสือ", icon: FileText },
-    { key: "legal", label: "ตรวจสอบนิติบุคคล", icon: ShieldCheck },
-    { key: "uploads", label: "หนังสือตอบรับ", icon: Upload },
-  ],
-  hr: [
-    { key: "queue", label: "คำร้องที่ได้รับ", icon: ClipboardCheck },
-    { key: "evaluate", label: "ประเมินนักศึกษา", icon: Star },
-  ],
-};
+const shadow1 = "0 2px 4px rgba(26,54,93,0.06)";
+const shadow2 = "0 10px 15px rgba(26,54,93,0.10)";
+
+/* ============================== MOCK DATA ============================== */
 
 const STUDENTS = [
-  { id: "6432010001", name: "สมชาย ใจดี", major: "วิทยาการคอมพิวเตอร์", year: 4, phone: "081-234-5678", email: "somchai.j@university.ac.th" },
-  { id: "6432010045", name: "มานี รักเรียน", major: "เทคโนโลยีสารสนเทศ", year: 4, phone: "082-345-6789", email: "manee.r@university.ac.th" },
-  { id: "6432010078", name: "วิชัย ก้าวหน้า", major: "วิศวกรรมซอฟต์แวร์", year: 4, phone: "083-456-7890", email: "wichai.k@university.ac.th" },
-  { id: "6432010099", name: "สมหญิง ตั้งใจ", major: "วิทยาการคอมพิวเตอร์", year: 4, phone: "084-567-8901", email: "somying.t@university.ac.th" },
+  { id: "s1", name: "สมชาย ใจดี", code: "630123456", major: "วิศวกรรมคอมพิวเตอร์", company: "TechCorp Solutions", position: "Frontend Developer Intern", period: "1 มี.ค. 2567 - 31 พ.ค. 2567", initials: "สจ", advisor: "ผศ.ดร. วิศวะ เก่งการ", logStatus: "รอตรวจ", appStatus: 2 },
+  { id: "s2", name: "สมหญิง รักเรียน", code: "630123457", major: "วิทยาการคอมพิวเตอร์", company: "เทคอินโนเวชั่น จำกัด", position: "Frontend Developer Intern", period: "1 มี.ค. 2567 - 31 พ.ค. 2567", initials: "สร", advisor: "ผศ.ดร. วิศวะ เก่งการ", logStatus: "ตรวจแล้ว", appStatus: 4 },
+  { id: "s3", name: "วิภาดา ก้าวหน้า", code: "630123458", major: "เทคโนโลยีสารสนเทศ", company: "Global Industries", position: "QA Intern", period: "1 มี.ค. 2567 - 31 พ.ค. 2567", initials: "วก", advisor: "ผศ.ดร. วิศวะ เก่งการ", logStatus: "ยังไม่ส่ง", appStatus: 1 },
+  { id: "s4", name: "ธนกฤต มั่นคง", code: "630123401", major: "วิทยาการคอมพิวเตอร์", company: "Acme Corp", position: "Backend Intern", period: "1 มี.ค. 2567 - 31 พ.ค. 2567", initials: "ธม", advisor: "ผศ.ดร. วิศวะ เก่งการ", logStatus: "ตรวจแล้ว", appStatus: 4 },
+  { id: "s5", name: "พิมพ์รดา สุขสม", code: "630123402", major: "การตลาด", company: "TechCorp Solutions", position: "Marketing Intern", period: "1 มี.ค. 2567 - 31 พ.ค. 2567", initials: "พส", advisor: "ผศ.ดร. วิศวะ เก่งการ", logStatus: "รอตรวจ", appStatus: 3 },
+];
+
+const APP_STEPS = ["ยื่นคำร้อง", "ตรวจสอบเอกสาร", "อาจารย์อนุมัติ", "เจ้าหน้าที่ออกเอกสาร", "บริษัทตอบรับ", "เริ่มฝึกงาน"];
+
+const NOTIFICATIONS = [
+  { id: 1, title: "ต้องการเอกสารประกันภัย", body: "โปรดอัปโหลดใบรับรองความรับผิดของคุณก่อนสัปดาห์หน้า", time: "2 ชั่วโมงที่แล้ว", tone: "warning" },
+  { id: 2, title: "สร้างสัญญาแล้ว", body: "สัญญาการฝึกงานของคุณถูกสร้างขึ้นโดยเจ้าหน้าที่แล้ว", time: "1 วันที่แล้ว", tone: "success" },
+  { id: 3, title: "นัดหมายนิเทศได้รับการยืนยัน", body: "อาจารย์วิศวะยืนยันนัดหมายวันที่ 15 พ.ย.", time: "2 วันที่แล้ว", tone: "info" },
+];
+
+const LOGS = [
+  { week: 3, date: "24 ต.ค. 2566", detail: "รวมระบบเกตเวย์การชำระเงินใหม่เข้ากับสภาพแวดล้อมทดสอบสำเร็จ พบปัญหาบางอย่างกับ webhooks แต่ได้รับการแก้ไขโดยอัปเดตตรรกะแยกวิเคราะห์ข้อมูล" },
+  { week: 2, date: "17 ต.ค. 2566", detail: "ร่วมมือกับทีมวิศวกรออกแบบโครงสร้างฐานข้อมูลสำหรับดูโปรไฟล์ผู้ใช้ใหม่ เน้นการทำข้อมูลให้เป็นมาตรฐานในขณะที่ยังรักษาประสิทธิภาพการอ่าน" },
 ];
 
 const COMPANIES = [
-  { name: "บริษัท ทรู ดิจิทัล กรุ๊ป จำกัด", taxId: "0105536090508", address: "18 อาคารทรู ทาวเวอร์ ถ.รัชดาภิเษก แขวงห้วยขวาง กรุงเทพฯ 10310", phone: "02-643-1111", email: "hr.recruit@truedigital.co.th", contact: "คุณกิตติพงษ์ ศรีสุข (ฝ่ายบุคคล)", rating: 4.5, skills: ["React", "Frontend", "UX Design"], reviews: [{ by: "รุ่นพี่ปี 2568", rating: 5, text: "พี่เลี้ยงดูแลดี ได้ลงมือทำโปรเจกต์จริง บรรยากาศทำงานทันสมัย" }] },
-  { name: "บริษัท ปตท. จำกัด (มหาชน)", taxId: "0107536000114", address: "555 ถ.วิภาวดีรังสิต แขวงจตุจักร กรุงเทพฯ 10900", phone: "02-537-2000", email: "internship@pttplc.com", contact: "คุณสุนีย์ พงษ์ไพบูลย์ (ฝ่ายทรัพยากรบุคคล)", rating: 4.2, skills: ["SQL", "Data Analysis", "Excel"], reviews: [{ by: "รุ่นพี่ปี 2567", rating: 4, text: "องค์กรใหญ่ ระบบงานชัดเจน แต่ค่อนข้างเป็นทางการ" }] },
-  { name: "ธนาคารกรุงไทย จำกัด (มหาชน)", taxId: "0107536000345", address: "35 ถ.สุขุมวิท แขวงคลองเตยเหนือ กรุงเทพฯ 10110", phone: "02-208-4000", email: "hr@ktb.co.th", contact: "คุณอรทัย ใจซื่อ (ฝ่ายบุคคล)", rating: 4.0, skills: ["Networking", "IT Support", "Java"], reviews: [] },
-  { name: "บริษัท เอสซีจี จำกัด (มหาชน)", taxId: "0107536000556", address: "1 ถ.ปูนซิเมนต์ไทย บางซื่อ กรุงเทพฯ 10800", phone: "02-586-3333", email: "careers@scg.com", contact: "คุณธนวัฒน์ ศรีทอง (ฝ่ายบุคคล)", rating: 4.7, skills: ["Business Analysis", "Data Analysis", "SQL"], reviews: [{ by: "รุ่นพี่ปี 2568", rating: 5, text: "ได้ทำงานกับทีมมืออาชีพ เรียนรู้เยอะมาก แนะนำเลยค่ะ" }] },
+  { id: "c1", name: "TechNova Solutions", industry: "การพัฒนาซอฟต์แแวร์ & AI", location: "กรุงเทพฯ", rating: 4.8, reviews: 124, match: 92, tags: ["React", "Node.js", "UI/UX"], verified: true, cultureMatch: "สูง" },
+  { id: "c2", name: "Global FinServe", industry: "การเงิน", location: "ทำงานระยะไกล", rating: 4.5, reviews: 61, match: 85, tags: ["Python", "Data"], verified: false },
+  { id: "c3", name: "EcoEnergy Group", industry: "พลังงาน", location: "ระยอง", rating: 4.2, reviews: 45, tags: ["วิศวกรรม", "ความยั่งยืน"], verified: true },
+  { id: "c4", name: "Creative Digital", industry: "การตลาด", location: "เชียงใหม่", rating: 4.9, reviews: 89, tags: ["ออกแบบ", "การตลาด"], verified: false },
 ];
 
-const SKILL_TAGS = ["React", "Python", "SQL", "UX Design", "Data Analysis", "Java", "Frontend", "Business Analysis", "IT Support", "Excel"];
-
-const INIT_REQUESTS = [
-  { id: 1, studentId: "6432010001", studentName: "สมชาย ใจดี", company: "บริษัท ทรู ดิจิทัล กรุ๊ป จำกัด", contact: "คุณกิตติพงษ์ ศรีสุข (ฝ่ายบุคคล)", address: "18 อาคารทรู ทาวเวอร์ ถ.รัชดาภิเษก แขวงห้วยขวาง กรุงเทพฯ 10310", phone: "02-643-1111", email: "hr.recruit@truedigital.co.th", position: "Frontend Developer Intern", start: "2026-11-02", end: "2027-02-27", status: "pending_advisor", signedBy: null, taxId: "0105536090508", uploads: [] },
-  { id: 2, studentId: "6432010045", studentName: "มานี รักเรียน", company: "บริษัท ปตท. จำกัด (มหาชน)", contact: "คุณสุนีย์ พงษ์ไพบูลย์ (ฝ่ายทรัพยากรบุคคล)", address: "555 ถ.วิภาวดีรังสิต แขวงจตุจักร กรุงเทพฯ 10900", phone: "02-537-2000", email: "internship@pttplc.com", position: "Data Analyst Intern", start: "2026-11-02", end: "2027-02-27", status: "approved", signedBy: "อ.ดร.ปิยะ วัฒนกุล", taxId: "0107536000114", uploads: [] },
-  { id: 3, studentId: "6432010078", studentName: "วิชัย ก้าวหน้า", company: "ธนาคารกรุงไทย จำกัด (มหาชน)", contact: "คุณอรทัย ใจซื่อ (ฝ่ายบุคคล)", address: "35 ถ.สุขุมวิท แขวงคลองเตยเหนือ กรุงเทพฯ 10110", phone: "02-208-4000", email: "hr@ktb.co.th", position: "IT Support Intern", start: "2026-11-02", end: "2027-02-27", status: "sent", signedBy: "อ.ดร.ปิยะ วัฒนกุล", taxId: "0107536000345", uploads: [] },
-  { id: 4, studentId: "6432010099", studentName: "สมหญิง ตั้งใจ", company: "บริษัท เอสซีจี จำกัด (มหาชน)", contact: "คุณธนวัฒน์ ศรีทอง (ฝ่ายบุคคล)", address: "1 ถ.ปูนซิเมนต์ไทย บางซื่อ กรุงเทพฯ 10800", phone: "02-586-3333", email: "careers@scg.com", position: "Business Analyst Intern", start: "2026-08-01", end: "2026-11-30", status: "accepted", signedBy: "อ.ดร.ปิยะ วัฒนกุล", taxId: "0107536000556", uploads: ["หนังสือตอบรับ_SCG.pdf"] },
+const REVIEWS = [
+  { company: "TechFlow Solutions", role: "Software Engineering Intern", rating: 4.8, pros: ["ได้ทำโปรเจกต์จริง มีผลกระทบต่อผู้ใช้งาน", "พี่เลี้ยง (Mentor) ดูแลดีมาก ให้คำแนะนำตลอด", "บรรยากาศการทำงานยืดหยุ่น (Hybrid work)"], cons: ["ช่วงปล่อย Release งานจะค่อนข้างหนัก", "ต้องศึกษา Tools ใหม่ๆ ด้วยตัวเองค่อนข้างเยอะ"], author: "รุ่นพี่ CS ปี 4", term: "ฝึกงานช่วง: ตุลาคม 2023", likes: 24 },
+  { company: "FinData Analytics", role: "Data Analyst Intern", rating: 4.2, pros: ["Data pipeline เป็นระบบเรียบร้อยมาก เรียนรู้ได้เยอะ", "สวัสดิการดี มีขนมและอวดเกมให้เล่นตอนพัก"], cons: ["การสื่อสารข้ามทีมค่อนข้างช้า ต้องตามเรื่องบ่อย", "ออฟฟิศอยู่ไกลจากรถไฟฟ้า เดินทางลำบากนิดหน่อย"], author: "รุ่นพี่ Stat ปี 3", term: "ฝึกงานช่วง: เทอม 1 2023", likes: 12 },
 ];
 
-const INIT_LOGBOOK = [
-  { id: 3, studentId: "6432010099", date: "2026-08-25", task: "เข้าร่วมประชุมทีม Business Analyst เพื่อวิเคราะห์ requirement ของระบบใหม่ และจัดทำเอกสารสรุป", hours: 8, files: ["สรุปประชุม.pdf"], comment: null },
-  { id: 2, studentId: "6432010099", date: "2026-08-24", task: "จัดทำ Flowchart กระบวนการอนุมัติสินเชื่อ และนำเสนอต่อพี่เลี้ยง", hours: 7, files: ["flowchart_v1.png"], comment: "สรุปประเด็นได้ชัดเจนดีมาก ลองเพิ่มรายละเอียดด้าน timeline ด้วยนะครับ" },
-  { id: 1, studentId: "6432010099", date: "2026-08-21", task: "ศึกษาระบบ ERP ภายในองค์กร และเข้าอบรม onboarding วันแรก", hours: 6, files: [], comment: "ยินดีต้อนรับสู่การฝึกงานครับ ตั้งใจศึกษาระบบให้ดีนะครับ" },
+const DOCS = [
+  { name: "Sarah Jenkins", code: "20210045", type: "จดหมายขอความอนุเคราะห์ (FR-04)", status: "ได้รับครองแล้ว", tone: "success", date: "24 ต.ค. 2566" },
+  { name: "Michael Chen", code: "20210112", type: "การอนุมัติจดหมายตอบรับ", status: "รอการลงนาม", tone: "warning", date: "22 ต.ค. 2566" },
+  { name: "Emily Rodriguez", code: "20210089", type: "จดหมายขอความอนุเคราะห์ (FR-04)", status: "ออกเอกสารแล้ว", tone: "success", date: "20 ต.ค. 2566" },
 ];
 
-const INIT_NOTIFS = [
-  { id: 1, text: "คำร้องฝึกงานของคุณสมชาย ใจดี ถูกส่งไปยังอาจารย์นิเทศแล้ว", time: "2 ชม.ที่แล้ว", read: false },
-  { id: 2, text: "อ.ดร.ปิยะ วัฒนกุล แสดงความคิดเห็นใน Logbook ของคุณ", time: "เมื่อวาน", read: false },
-  { id: 3, text: "ใกล้ถึงกำหนดส่งรายงานฝึกงานประจำสัปดาห์", time: "2 วันที่แล้ว", read: true },
+const EVAL_GROUPS = [
+  { icon: "skills", title: "1. ทักษะวิชาชีพและการทำงาน (Professional Skills)", desc: "ประเมินความสามารถในการนำความรู้ทางวิชาการมาประยุกต์ใช้ในการทำงานจริง", items: ["ความรู้ความเข้าใจในงานที่ได้รับมอบหมาย", "คุณภาพของงานและความถูกต้องแม่นยำ"] },
+  { icon: "attitude", title: "2. ทัศนคติและความรับผิดชอบ (Attitude & Responsibility)", desc: "", items: ["ความตรงต่อเวลาและการปฏิบัติตามกฎระเบียบ"] },
 ];
 
-const INIT_MEETINGS = [
-  { id: 1, student: "สมหญิง ตั้งใจ", date: "2026-09-02", time: "13:00", platform: "Google Meet", link: "meet.google.com/abc-defg-hij" },
-  { id: 2, student: "สมชาย ใจดี", date: "2026-09-05", time: "10:00", platform: "Zoom", link: "zoom.us/j/1234567890" },
+const APPOINTMENTS = [
+  { title: "นิเทศครั้งที่ 1: รายงานความคืบหน้าโปรเจกต์", date: "15 พ.ย.", time: "10:00 - 11:00 น.", advisor: "อ.ดร. วิศวะ เก่งการ", platform: "Google Meet", status: "ยืนยันแล้ว" },
 ];
 
-const INIT_CHAT = [
-  { from: "student", text: "สวัสดีค่ะอาจารย์ หนูมีคำถามเกี่ยวกับการเขียนรายงานสัปดาห์นี้ค่ะ", time: "10:32" },
-  { from: "advisor", text: "สวัสดีครับ ถามมาได้เลยครับ", time: "10:35" },
-];
+/* ============================== SMALL UI ATOMS ============================== */
 
-function fmtDate(d) {
-  const dt = new Date(d + "T00:00:00");
-  return dt.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
-}
-
-function Badge({ tone, children }) {
-  const tones = {
-    navy: [T.navyPale, T.navy],
-    gold: [T.goldPale, T.goldDark],
-    green: [T.greenPale, T.green],
-    amber: [T.amberPale, T.amber],
-    red: [T.redPale, T.red],
-    gray: ["#EDEEF2", T.muted],
+function StatusChip({ tone = "info", children }) {
+  const map = {
+    success: { bg: C.successBg, fg: "#1E7B44" },
+    warning: { bg: C.warningBg, fg: "#8A6D1A" },
+    error: { bg: C.errorBg, fg: C.error },
+    info: { bg: "#EBF8FF", fg: C.primaryDark },
+    neutral: { bg: "#EDF2F7", fg: C.textMuted },
   };
-  const [bg, fg] = tones[tone] || tones.gray;
+  const s = map[tone] || map.info;
   return (
-    <span style={{ background: bg, color: fg, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 999, whiteSpace: "nowrap" }}>
+    <span style={{ background: s.bg, color: s.fg }} className="px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide inline-block whitespace-nowrap">
       {children}
     </span>
   );
 }
 
-function statusTone(status) {
-  return { submitted: "navy", pending_advisor: "amber", approved: "gold", document_issued: "gold", sent: "navy", accepted: "green" }[status] || "gray";
-}
-
-function Card({ children, style }) {
+function Card({ children, className = "", style = {}, accent }) {
   return (
-    <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: "18px 20px", ...style }}>
+    <div
+      className={`bg-white rounded-lg border ${className}`}
+      style={{ borderColor: C.border, boxShadow: shadow1, borderTopWidth: accent ? 3 : 1, borderTopColor: accent || C.border, ...style }}
+    >
       {children}
     </div>
   );
 }
 
-function SectionHeader({ eyebrow, title, desc }) {
+function ProgressBar({ value, tone = C.primary, track = "#EDF2F7", height = 8 }) {
   return (
-    <div style={{ marginBottom: 20 }}>
-      {eyebrow && <div style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.12em", color: T.gold, textTransform: "uppercase", marginBottom: 6 }}>{eyebrow}</div>}
-      <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 24, fontWeight: 700, color: T.navy, margin: 0 }}>{title}</h1>
-      {desc && <p style={{ fontFamily: FONT_BODY, fontSize: 13.5, color: T.muted, margin: "6px 0 0" }}>{desc}</p>}
+    <div style={{ background: track, height, borderRadius: 999 }} className="w-full overflow-hidden">
+      <div style={{ width: `${value}%`, background: tone, height: "100%", borderRadius: 999, transition: "width .4s ease" }} />
     </div>
   );
 }
 
-function StatusPipeline({ status }) {
-  const idx = STAGES.findIndex((s) => s.key === status);
+function Avatar({ initials, size = 40, tone = C.navy }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", overflowX: "auto", padding: "4px 2px" }}>
-      {STAGES.map((s, i) => {
-        const done = i < idx, current = i === idx;
-        const dotColor = done ? T.gold : current ? T.navy : "#D7DAE2";
-        return (
-          <div key={s.key} style={{ display: "flex", alignItems: "flex-start", flex: i === STAGES.length - 1 ? "0 0 auto" : "1 1 0", minWidth: 92 }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 92 }}>
-              <div style={{
-                width: 26, height: 26, borderRadius: "50%", background: done || current ? dotColor : "#fff",
-                border: `2px solid ${dotColor}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-              }}>
-                {done ? <Check size={14} color="#fff" /> : current ? <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} /> : null}
-              </div>
-              <div style={{
-                fontFamily: FONT_BODY, fontSize: 11.5, textAlign: "center", marginTop: 8, lineHeight: 1.3,
-                color: current ? T.navy : done ? T.text : T.muted, fontWeight: current ? 700 : 500, maxWidth: 92,
-              }}>{s.label}</div>
-            </div>
-            {i < STAGES.length - 1 && (
-              <div style={{ height: 2, background: done ? T.gold : "#D7DAE2", flex: 1, marginTop: 12, minWidth: 16 }} />
-            )}
-          </div>
-        );
-      })}
+    <div style={{ width: size, height: size, background: tone, color: "#fff", fontSize: size * 0.38 }} className="rounded-full flex items-center justify-center font-semibold shrink-0">
+      {initials}
     </div>
   );
 }
 
-function inputStyle() {
-  return { fontFamily: FONT_BODY, fontSize: 13.5, padding: "9px 12px", borderRadius: 8, border: `1px solid ${T.border}`, width: "100%", boxSizing: "border-box", color: T.text, background: "#fff" };
-}
-function labelStyle() {
-  return { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 5, display: "block" };
-}
-function btnPrimary(extra) {
-  return { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, padding: "9px 18px", borderRadius: 8, border: "none", background: T.navy, color: "#fff", cursor: "pointer", ...extra };
-}
-function btnGold(extra) {
-  return { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, padding: "9px 18px", borderRadius: 8, border: "none", background: T.gold, color: "#3A2C0E", cursor: "pointer", ...extra };
-}
-function btnGhost(extra) {
-  return { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, padding: "8px 16px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.text, cursor: "pointer", ...extra };
+function StarRow({ value, onChange, size = 18 }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star
+          key={n}
+          size={size}
+          onClick={() => onChange && onChange(n)}
+          className={onChange ? "cursor-pointer" : ""}
+          fill={n <= value ? "#ECC94B" : "none"}
+          color={n <= value ? "#ECC94B" : "#CBD5E0"}
+        />
+      ))}
+    </div>
+  );
 }
 
-function Header({ role, setRole, notifs, onOpenNotifs, notifOpen, onMarkRead }) {
-  const meta = ROLE_META[role];
+function SectionHeader({ title, subtitle, action }) {
   return (
-    <div style={{ background: T.navy, padding: "0 24px", position: "sticky", top: 0, zIndex: 20 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 8, background: T.gold, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, color: T.navy, fontSize: 16 }}>ฝ</div>
-          <div>
-            <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, color: "#fff", fontSize: 16, lineHeight: 1.1 }}>ระบบฝึกงานสหกิจศึกษา</div>
-            <div style={{ fontFamily: FONT_MONO, fontSize: 10.5, color: "#9FADC8", letterSpacing: "0.06em" }}>COOP-INTERN PORTAL</div>
-          </div>
+    <div className="flex items-start justify-between mb-5 flex-wrap gap-3">
+      <div>
+        <h1 style={{ color: C.navy, fontFamily: "Inter" }} className="text-2xl font-bold">{title}</h1>
+        {subtitle && <p style={{ color: C.textMuted }} className="text-sm mt-1">{subtitle}</p>}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function Btn({ children, variant = "primary", onClick, className = "", icon: Icon, size = "md" }) {
+  const pad = size === "sm" ? "px-3 py-1.5 text-xs" : "px-4 py-2.5 text-sm";
+  const styles = {
+    primary: { background: C.navy, color: "#fff" },
+    accent: { background: C.primary, color: "#fff" },
+    outline: { background: "#fff", color: C.primary, border: `1px solid ${C.primary}` },
+    ghost: { background: "transparent", color: C.textBody },
+    subtle: { background: "#EDF2F7", color: C.textBody },
+  };
+  return (
+    <button
+      onClick={onClick}
+      style={styles[variant]}
+      className={`rounded font-semibold flex items-center gap-1.5 justify-center transition hover:opacity-90 active:scale-[0.98] ${pad} ${className}`}
+    >
+      {Icon && <Icon size={16} />}
+      {children}
+    </button>
+  );
+}
+
+/* ============================== SHELL: SIDEBAR + TOPBAR ============================== */
+
+const ROLE_META = {
+  student: { label: "นักศึกษาฝึกงาน", name: "สมชาย ใจดี", sub: "นักศึกษาฝึกงาน", initials: "สจ" },
+  advisor: { label: "อาจารย์นิเทศ", name: "ผศ.ดร. วิศวะ เก่งการ", sub: "อาจารย์นิเทศ", initials: "วก" },
+  hr: { label: "HR บริษัท", name: "คุณสมชาย ใจดี", sub: "HR Manager", initials: "สจ" },
+  admin: { label: "เจ้าหน้าที่มหาวิทยาลัย", name: "คุณกานดา ดูแลดี", sub: "เจ้าหน้าที่สหกิจศึกษา", initials: "กด" },
+};
+
+const NAV = {
+  student: [
+    { key: "dash", label: "แดชบอร์ด", icon: LayoutDashboard },
+    { key: "apply", label: "ใบสมัครฝึกงาน", icon: FileText },
+    { key: "companies", label: "สถานประกอบการ", icon: Building2 },
+    { key: "docs", label: "เอกสาร", icon: FolderOpen },
+    { key: "appt", label: "นิเทศออนไลน์", icon: Video },
+    { key: "log", label: "Logbook", icon: BookOpen },
+  ],
+  advisor: [
+    { key: "dash", label: "แดชบอร์ด", icon: LayoutDashboard },
+    { key: "students", label: "นักศึกษาในความดูแล", icon: Users },
+    { key: "appt", label: "นิเทศออนไลน์", icon: Video },
+    { key: "log", label: "ตรวจ Logbook", icon: BookOpen },
+  ],
+  hr: [
+    { key: "dash", label: "แดชบอร์ด", icon: LayoutDashboard },
+    { key: "apps", label: "ใบสมัคร", icon: FileText },
+    { key: "eval", label: "ประเมินผลการฝึกงาน", icon: ClipboardList },
+    { key: "docs", label: "เอกสาร", icon: FolderOpen },
+  ],
+  admin: [
+    { key: "dash", label: "แผงควบคุม", icon: LayoutDashboard },
+    { key: "apps", label: "การขึ้นคำร้อง", icon: FileText },
+    { key: "companies", label: "สถานประกอบการ", icon: Building2 },
+    { key: "docs", label: "เอกสาร", icon: FolderOpen },
+    { key: "analytics", label: "การวิเคราะห์", icon: BarChart3 },
+  ],
+};
+
+function Sidebar({ role, page, setPage, onLogout }) {
+  const items = NAV[role];
+  return (
+    <aside style={{ width: 260, borderColor: C.border }} className="shrink-0 bg-white border-r flex flex-col h-full">
+      <div className="px-5 py-5 flex items-center gap-2.5 border-b" style={{ borderColor: C.border }}>
+        <div style={{ background: C.navy }} className="w-9 h-9 rounded-md flex items-center justify-center">
+          <GraduationCap size={20} color="#fff" />
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ position: "relative" }}>
-            <button aria-label="การแจ้งเตือน" onClick={onOpenNotifs} style={{ background: "transparent", border: "none", cursor: "pointer", position: "relative", padding: 6 }}>
-              <Bell size={19} color="#D8DEEA" />
-              {notifs.some((n) => !n.read) && (
-                <span style={{ position: "absolute", top: 3, right: 3, width: 8, height: 8, borderRadius: "50%", background: T.red, border: `1.5px solid ${T.navy}` }} />
-              )}
-            </button>
-            {notifOpen && (
-              <div style={{ position: "absolute", right: 0, top: 40, width: 300, background: "#fff", borderRadius: 10, border: `1px solid ${T.border}`, boxShadow: "0 8px 24px rgba(15,20,35,0.18)", overflow: "hidden" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderBottom: `1px solid ${T.border}` }}>
-                  <span style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy }}>การแจ้งเตือน</span>
-                  <button onClick={onMarkRead} style={{ background: "none", border: "none", color: T.gold, fontSize: 11.5, fontFamily: FONT_BODY, fontWeight: 600, cursor: "pointer" }}>อ่านทั้งหมด</button>
-                </div>
-                {notifs.map((n) => (
-                  <div key={n.id} style={{ padding: "10px 14px", borderBottom: `1px solid ${T.border}`, background: n.read ? "#fff" : "#FBF8F1" }}>
-                    <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text, lineHeight: 1.45 }}>{n.text}</div>
-                    <div style={{ fontFamily: FONT_BODY, fontSize: 11, color: T.muted, marginTop: 3 }}>{n.time}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div style={{ width: 1, height: 24, background: "#33456B" }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 32, height: 32, borderRadius: "50%", background: T.navyLight, border: `1px solid #33456B`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <meta.icon size={16} color={T.gold} />
-            </div>
-            <div>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>{meta.name}</div>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 10.5, color: "#9FADC8" }}>{meta.label}</div>
-            </div>
-          </div>
+        <div>
+          <div style={{ color: C.navy }} className="font-bold text-[17px] leading-tight">UniIntern</div>
+          <div style={{ color: C.textMuted }} className="text-[11px]">Management Portal</div>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 6, paddingBottom: 10 }}>
-        {Object.entries(ROLE_META).map(([key, m]) => {
-          const active = key === role;
+
+      {(role === "student" || role === "admin") && (
+        <div className="px-4 pt-4">
+          <Btn variant="primary" icon={Plus} className="w-full">{role === "admin" ? "สร้างคำร้องใหม่" : "New Application"}</Btn>
+        </div>
+      )}
+
+      <nav className="flex-1 px-3 py-4 space-y-1">
+        {items.map((it) => {
+          const active = page === it.key;
           return (
-            <button key={key} onClick={() => setRole(key)} style={{
-              display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 8, cursor: "pointer",
-              border: active ? `1px solid ${T.gold}` : "1px solid transparent", background: active ? "rgba(198,154,60,0.15)" : "transparent",
-              fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, color: active ? T.gold : "#B7C0D6",
-            }}>
-              <m.icon size={14} />
-              {m.label}
+            <button
+              key={it.key}
+              onClick={() => setPage(it.key)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition"
+              style={{
+                background: active ? "#EBF3FC" : "transparent",
+                color: active ? C.primary : C.textBody,
+                borderLeft: active ? `3px solid ${C.primary}` : "3px solid transparent",
+              }}
+            >
+              <it.icon size={18} />
+              {it.label}
             </button>
           );
         })}
-      </div>
-    </div>
-  );
-}
+      </nav>
 
-function Sidebar({ role, view, setView }) {
-  return (
-    <div style={{ width: 220, flexShrink: 0, background: "#fff", borderRight: `1px solid ${T.border}`, padding: "18px 12px", minHeight: "calc(100vh - 101px)" }}>
-      {NAV[role].map((item) => {
-        const active = item.key === view;
-        return (
-          <button key={item.key} onClick={() => setView(item.key)} style={{
-            display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", padding: "10px 12px",
-            borderRadius: 8, border: "none", cursor: "pointer", marginBottom: 3,
-            background: active ? T.navyPale : "transparent", color: active ? T.navy : T.muted,
-            fontFamily: FONT_BODY, fontSize: 13, fontWeight: active ? 700 : 500,
-          }}>
-            <item.icon size={16} color={active ? T.navy : T.muted} />
-            {item.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ---------- STUDENT VIEWS ---------- */
-
-function StudentDashboard({ me, myRequest, notifs, aiTeaser }) {
-  return (
-    <div>
-      <SectionHeader eyebrow="ภาพรวม" title={`สวัสดี ${me.name}`} desc="สรุปสถานะการฝึกงานและกิจกรรมล่าสุดของคุณ" />
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
-        <Card>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-            <div>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: T.muted }}>สถานประกอบการปัจจุบัน</div>
-              <div style={{ fontFamily: FONT_DISPLAY, fontSize: 17, fontWeight: 700, color: T.navy }}>{myRequest.company}</div>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.muted, marginTop: 2 }}>{myRequest.position} · {fmtDate(myRequest.start)} – {fmtDate(myRequest.end)}</div>
-            </div>
-            <Badge tone={statusTone(myRequest.status)}>{STAGES.find((s) => s.key === myRequest.status)?.label}</Badge>
-          </div>
-          <StatusPipeline status={myRequest.status} />
-        </Card>
-        <Card>
-          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy, marginBottom: 10 }}>ข้อมูลนักศึกษา</div>
-          {[["รหัสนักศึกษา", me.id], ["สาขา", me.major], ["เบอร์โทร", me.phone], ["อีเมล", me.email]].map(([k, v]) => (
-            <div key={k} style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_BODY, fontSize: 12.5, padding: "6px 0", borderBottom: `1px solid ${T.border}` }}>
-              <span style={{ color: T.muted }}>{k}</span><span style={{ color: T.text, fontWeight: 500 }}>{v}</span>
-            </div>
-          ))}
-        </Card>
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16 }}>
-        <Card>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-            <Sparkles size={16} color={T.gold} />
-            <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy }}>บริษัทแนะนำสำหรับคุณ</div>
-          </div>
-          {aiTeaser.map((c) => (
-            <div key={c.name} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${T.border}` }}>
-              <span style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text }}>{c.name}</span>
-              <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.gold, fontWeight: 700 }}>{c.match}%</span>
-            </div>
-          ))}
-        </Card>
-        <Card>
-          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy, marginBottom: 10 }}>การแจ้งเตือนล่าสุด</div>
-          {notifs.slice(0, 3).map((n) => (
-            <div key={n.id} style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text, padding: "7px 0", borderBottom: `1px solid ${T.border}` }}>{n.text}</div>
-          ))}
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-function StudentRequestForm({ onSubmit }) {
-  const [form, setForm] = useState({ company: "", contact: "", address: "", phone: "", email: "", position: "", start: "", end: "" });
-  const [errors, setErrors] = useState({});
-  const [suggestOpen, setSuggestOpen] = useState(false);
-  const [verified, setVerified] = useState(null);
-  const [checking, setChecking] = useState(false);
-  const required = ["company", "contact", "address", "phone", "email", "position", "start", "end"];
-
-  const set = (k, v) => { setForm((f) => ({ ...f, [k]: v })); setErrors((e) => ({ ...e, [k]: false })); };
-
-  const pick = (c) => {
-    setForm({ company: c.name, contact: c.contact, address: c.address, phone: c.phone, email: c.email, position: form.position, start: form.start, end: form.end });
-    setVerified(null);
-    setSuggestOpen(false);
-  };
-
-  const checkLegal = () => {
-    setChecking(true);
-    setTimeout(() => {
-      const match = COMPANIES.find((c) => c.name.includes(form.company) || form.company.includes(c.name));
-      setVerified(match ? { ok: true, taxId: match.taxId } : { ok: false });
-      setChecking(false);
-    }, 900);
-  };
-
-  const validate = () => {
-    const e = {};
-    required.forEach((k) => { if (!form[k]) e[k] = true; });
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const submit = (asDraft) => {
-    if (!asDraft && !validate()) return;
-    onSubmit({ ...form, status: asDraft ? "draft" : "submitted" });
-    setForm({ company: "", contact: "", address: "", phone: "", email: "", position: "", start: "", end: "" });
-    setVerified(null);
-  };
-
-  const field = (k, label, placeholder, type = "text") => (
-    <div style={{ marginBottom: 14, position: "relative" }}>
-      <label style={labelStyle()}>{label} <span style={{ color: T.red }}>*</span></label>
-      <input
-        type={type} value={form[k]} placeholder={placeholder}
-        onChange={(e) => { set(k, e.target.value); if (k === "company") setSuggestOpen(e.target.value.length > 0); }}
-        onFocus={() => k === "company" && form.company && setSuggestOpen(true)}
-        style={{ ...inputStyle(), border: `1px solid ${errors[k] ? T.red : T.border}` }}
-      />
-      {errors[k] && <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: T.red, marginTop: 4 }}>กรุณากรอกข้อมูลนี้ให้ครบก่อนยื่นคำร้อง</div>}
-      {k === "company" && suggestOpen && (
-        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: `1px solid ${T.border}`, borderRadius: 8, marginTop: 4, zIndex: 10, boxShadow: "0 6px 18px rgba(15,20,35,0.12)" }}>
-          {COMPANIES.filter((c) => c.name.includes(form.company)).slice(0, 4).map((c) => (
-            <div key={c.name} onClick={() => pick(c)} style={{ padding: "9px 12px", fontFamily: FONT_BODY, fontSize: 12.5, cursor: "pointer", borderBottom: `1px solid ${T.border}` }}>
-              {c.name}
-            </div>
-          ))}
-          {COMPANIES.filter((c) => c.name.includes(form.company)).length === 0 && (
-            <div style={{ padding: "9px 12px", fontFamily: FONT_BODY, fontSize: 12, color: T.muted }}>ไม่พบในฐานข้อมูลเดิม พิมพ์ต่อเพื่อกรอกข้อมูลใหม่</div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-
-  return (
-    <div>
-      <SectionHeader eyebrow="FR-02 / FR-07 / FR-08 / FR-09" title="ยื่นคำร้องฝึกงาน" desc="กรอกข้อมูลสถานประกอบการให้ครบถ้วน ระบบจะตรวจสอบช่องที่มีเครื่องหมาย * ก่อนบันทึก" />
-      <Card>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-          {field("company", "ชื่อบริษัท", "เริ่มพิมพ์เพื่อค้นหาจากฐานข้อมูล")}
-          {field("contact", "ผู้รับหนังสือ", "ชื่อผู้ติดต่อ / ตำแหน่ง")}
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle()}>ที่อยู่บริษัท <span style={{ color: T.red }}>*</span></label>
-          <input value={form.address} placeholder="เลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด" onChange={(e) => set("address", e.target.value)} style={{ ...inputStyle(), border: `1px solid ${errors.address ? T.red : T.border}` }} />
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-          {field("phone", "เบอร์โทร", "0X-XXX-XXXX")}
-          {field("email", "อีเมล", "name@company.com")}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 16px" }}>
-          {field("position", "ตำแหน่งฝึกงาน", "เช่น Frontend Developer Intern")}
-          {field("start", "วันเริ่มต้น", "", "date")}
-          {field("end", "วันสิ้นสุด", "", "date")}
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "6px 0 18px" }}>
-          <button onClick={checkLegal} disabled={!form.company || checking} style={btnGhost({ display: "flex", alignItems: "center", gap: 6, opacity: !form.company ? 0.5 : 1 })}>
-            <ShieldCheck size={14} /> {checking ? "กำลังตรวจสอบ..." : "ตรวจสอบข้อมูลนิติบุคคล"}
-          </button>
-          {verified && verified.ok && <Badge tone="green">ยืนยันแล้ว · เลขทะเบียน {verified.taxId}</Badge>}
-          {verified && !verified.ok && <Badge tone="red">ไม่พบข้อมูลในฐาน DBD กรุณาตรวจสอบชื่อบริษัท</Badge>}
-        </div>
-
-        <div style={{ display: "flex", gap: 10, borderTop: `1px solid ${T.border}`, paddingTop: 16 }}>
-          <button onClick={() => submit(false)} style={btnGold()}>ยื่นคำร้อง</button>
-          <button onClick={() => submit(true)} style={btnGhost()}>บันทึกร่าง</button>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-function StudentStatus({ myRequest, onUpload }) {
-  return (
-    <div>
-      <SectionHeader eyebrow="FR-03 / FR-04 / FR-06" title="ติดตามสถานะเอกสาร" desc="ตรวจสอบความคืบหน้าของคำร้องฝึกงานของคุณแบบเรียลไทม์" />
-      <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
-          <div>
-            <div style={{ fontFamily: FONT_DISPLAY, fontSize: 16, fontWeight: 700, color: T.navy }}>{myRequest.company}</div>
-            <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.muted }}>{myRequest.position}</div>
-          </div>
-          <Badge tone={statusTone(myRequest.status)}>{STAGES.find((s) => s.key === myRequest.status)?.label}</Badge>
-        </div>
-        <StatusPipeline status={myRequest.status} />
-        {myRequest.signedBy && (
-          <div style={{ marginTop: 18, padding: "12px 14px", background: T.navyPale, borderRadius: 8, fontFamily: FONT_BODY, fontSize: 12.5, color: T.navy }}>
-            ลงนามอนุมัติโดย <b>{myRequest.signedBy}</b> · หนังสือขอความอนุเคราะห์ถูกสร้างและจัดส่งตามขั้นตอน FR-04
-          </div>
-        )}
-        {myRequest.status === "sent" && (
-          <div style={{ marginTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", border: `1px dashed ${T.border}`, borderRadius: 8 }}>
-            <span style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text }}>รอหนังสือตอบรับจากสถานประกอบการ — เมื่อได้รับแล้วสามารถอัปโหลดที่นี่</span>
-            <button onClick={onUpload} style={btnGhost({ display: "flex", alignItems: "center", gap: 6 })}><Upload size={14} /> อัปโหลด</button>
-          </div>
-        )}
-        {myRequest.uploads.length > 0 && (
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 12.5, color: T.navy, marginBottom: 8 }}>เอกสารย้อนหลัง</div>
-            {myRequest.uploads.map((u) => (
-              <div key={u} style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 12.5, color: T.text, padding: "6px 0" }}>
-                <Paperclip size={13} color={T.muted} /> {u}
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
-    </div>
-  );
-}
-
-function StudentLogbook({ entries, onAdd }) {
-  const [open, setOpen] = useState(false);
-  const [task, setTask] = useState("");
-  const [hours, setHours] = useState("");
-  const [file, setFile] = useState("");
-  const [err, setErr] = useState(false);
-
-  const save = () => {
-    if (!task.trim()) { setErr(true); return; }
-    onAdd({ task, hours: Number(hours) || 0, files: file ? [file] : [] });
-    setTask(""); setHours(""); setFile(""); setOpen(false); setErr(false);
-  };
-
-  return (
-    <div>
-      <SectionHeader eyebrow="FR-10" title="Logbook บันทึกการฝึกงาน" desc="บันทึกงานประจำวันพร้อมแนบไฟล์ อาจารย์นิเทศจะเข้ามาตรวจและแสดงความคิดเห็น" />
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-        <button onClick={() => setOpen(!open)} style={btnGold({ display: "flex", alignItems: "center", gap: 6 })}><Plus size={14} /> บันทึกงานวันนี้</button>
-      </div>
-      {open && (
-        <Card style={{ marginBottom: 16 }}>
-          <label style={labelStyle()}>รายละเอียดงานที่ทำ</label>
-          <textarea value={task} onChange={(e) => { setTask(e.target.value); setErr(false); }} rows={3} placeholder="วันนี้ได้ทำอะไรบ้าง เรียนรู้อะไรเพิ่มเติม" style={{ ...inputStyle(), border: `1px solid ${err ? T.red : T.border}`, resize: "vertical" }} />
-          {err && <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: T.red, margin: "4px 0" }}>กรุณากรอกรายละเอียดงานก่อนบันทึก</div>}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 10 }}>
-            <div><label style={labelStyle()}>จำนวนชั่วโมง</label><input type="number" value={hours} onChange={(e) => setHours(e.target.value)} style={inputStyle()} placeholder="8" /></div>
-            <div><label style={labelStyle()}>แนบไฟล์ / รูปภาพ</label>
-              <button onClick={() => setFile(`เอกสารแนบ_${Date.now().toString().slice(-4)}.pdf`)} style={btnGhost({ display: "flex", alignItems: "center", gap: 6, width: "100%", justifyContent: "center" })}>
-                <Paperclip size={13} /> {file || "เลือกไฟล์"}
-              </button>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-            <button onClick={save} style={btnPrimary()}>บันทึก</button>
-            <button onClick={() => setOpen(false)} style={btnGhost()}>ยกเลิก</button>
-          </div>
-        </Card>
-      )}
-      {entries.map((e) => (
-        <Card key={e.id} style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-            <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.gold, fontWeight: 700 }}>{fmtDate(e.date)}</span>
-            <span style={{ fontFamily: FONT_BODY, fontSize: 12, color: T.muted }}>{e.hours} ชั่วโมง</span>
-          </div>
-          <p style={{ fontFamily: FONT_BODY, fontSize: 13, color: T.text, margin: "0 0 8px", lineHeight: 1.6 }}>{e.task}</p>
-          {e.files.length > 0 && (
-            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-              {e.files.map((f) => <span key={f} style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: FONT_BODY, fontSize: 11.5, color: T.muted, background: T.paper, padding: "3px 8px", borderRadius: 6 }}><Paperclip size={11} />{f}</span>)}
-            </div>
-          )}
-          {e.comment && (
-            <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 8, marginTop: 4 }}>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: T.gold, fontWeight: 700, marginBottom: 2 }}>ความคิดเห็นจากอาจารย์นิเทศ</div>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text }}>{e.comment}</div>
-            </div>
-          )}
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-function StudentMatch() {
-  const [selected, setSelected] = useState([]);
-  const [results, setResults] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [query, setQuery] = useState("");
-
-  const toggle = (s) => setSelected((sel) => sel.includes(s) ? sel.filter((x) => x !== s) : [...sel, s]);
-
-  const analyze = () => {
-    if (selected.length === 0) return;
-    setLoading(true);
-    setTimeout(() => {
-      const scored = COMPANIES.map((c) => {
-        const overlap = c.skills.filter((s) => selected.includes(s)).length;
-        const match = Math.min(97, 55 + overlap * 15);
-        return { ...c, match };
-      }).sort((a, b) => b.match - a.match);
-      setResults(scored);
-      setLoading(false);
-    }, 1000);
-  };
-
-  const filtered = COMPANIES.filter((c) => c.name.includes(query));
-
-  return (
-    <div>
-      <SectionHeader eyebrow="FR-07 / FR-17" title="ค้นหาบริษัท & AI Matching" desc="ค้นหาสถานประกอบการ หรือให้ระบบวิเคราะห์ทักษะและแนะนำบริษัทที่เหมาะกับคุณ" />
-      <Card style={{ marginBottom: 16 }}>
-        <label style={labelStyle()}>ค้นหาบริษัทจากฐานข้อมูล</label>
-        <div style={{ position: "relative" }}>
-          <Search size={15} color={T.muted} style={{ position: "absolute", left: 12, top: 11 }} />
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="พิมพ์ชื่อบริษัท" style={{ ...inputStyle(), paddingLeft: 34 }} />
-        </div>
-        {query && (
-          <div style={{ marginTop: 10 }}>
-            {filtered.length === 0 && <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.muted }}>ไม่พบบริษัทที่ตรงกับคำค้นหา</div>}
-            {filtered.map((c) => (
-              <div key={c.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${T.border}` }}>
-                <div>
-                  <div style={{ fontFamily: FONT_BODY, fontWeight: 600, fontSize: 13, color: T.navy }}>{c.name}</div>
-                  <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: T.muted }}>{c.address}</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: FONT_BODY, fontSize: 12.5, color: T.gold, fontWeight: 700 }}><Star size={13} fill={T.gold} color={T.gold} />{c.rating}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
-
-      <Card>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-          <Sparkles size={16} color={T.gold} />
-          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13.5, color: T.navy }}>AI Matching — เลือกทักษะของคุณ</div>
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
-          {SKILL_TAGS.map((s) => {
-            const on = selected.includes(s);
-            return (
-              <button key={s} onClick={() => toggle(s)} style={{
-                fontFamily: FONT_BODY, fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 999, cursor: "pointer",
-                border: `1px solid ${on ? T.gold : T.border}`, background: on ? T.goldPale : "#fff", color: on ? T.goldDark : T.text,
-              }}>{s}</button>
-            );
-          })}
-        </div>
-        <button onClick={analyze} disabled={selected.length === 0} style={btnGold({ opacity: selected.length === 0 ? 0.5 : 1 })}>
-          {loading ? "กำลังวิเคราะห์..." : "วิเคราะห์และแนะนำบริษัท"}
+      <div className="px-3 py-4 border-t space-y-1" style={{ borderColor: C.border }}>
+        <button className="w-full flex items-center gap-3 px-3 py-2 rounded text-sm" style={{ color: C.textMuted }}>
+          <Settings size={17} /> ศูนย์ช่วยเหลือ
         </button>
+        <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2 rounded text-sm" style={{ color: C.textMuted }}>
+          <LogOut size={17} /> ออกจากระบบ
+        </button>
+      </div>
+    </aside>
+  );
+}
 
-        {results && (
-          <div style={{ marginTop: 18 }}>
-            {results.slice(0, 3).map((c) => (
-              <div key={c.name} style={{ padding: "12px 0", borderTop: `1px solid ${T.border}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy }}>{c.name}</span>
-                  <span style={{ fontFamily: FONT_MONO, fontSize: 13, color: T.gold, fontWeight: 700 }}>{c.match}% ตรงกัน</span>
-                </div>
-                <div style={{ height: 5, background: T.border, borderRadius: 3, marginTop: 6 }}>
-                  <div style={{ height: 5, width: `${c.match}%`, background: T.gold, borderRadius: 3 }} />
-                </div>
-                <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: T.muted, marginTop: 6 }}>ตรงกับทักษะ: {c.skills.filter((s) => selected.includes(s)).join(", ") || "ตำแหน่งงานใกล้เคียงสายงานของคุณ"}</div>
-              </div>
-            ))}
-            <button style={btnGhost({ marginTop: 10, display: "flex", alignItems: "center", gap: 6 })}><Download size={14} /> สร้าง Resume จากข้อมูลนี้</button>
+function TopBar({ role, title }) {
+  const meta = ROLE_META[role];
+  return (
+    <div style={{ borderColor: C.border }} className="bg-white border-b px-8 py-4 flex items-center justify-between">
+      <h2 style={{ color: C.navy }} className="text-lg font-bold">{title}</h2>
+      <div className="flex items-center gap-5">
+        <button className="relative" style={{ color: C.textMuted }}>
+          <Bell size={20} />
+          <span style={{ background: C.error }} className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" />
+        </button>
+        <button style={{ color: C.textMuted }}><MessageSquare size={20} /></button>
+        <div className="flex items-center gap-2.5 pl-4 border-l" style={{ borderColor: C.border }}>
+          <Avatar initials={meta.initials} size={36} />
+          <div className="leading-tight">
+            <div className="text-sm font-semibold" style={{ color: C.text }}>{meta.name}</div>
+            <div className="text-[11px]" style={{ color: C.textMuted }}>{meta.sub}</div>
           </div>
-        )}
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
 
-function StudentReviews({ companies, onAddReview }) {
-  const [openFor, setOpenFor] = useState(null);
-  const [rating, setRating] = useState(5);
-  const [text, setText] = useState("");
+/* ============================== LOGIN ============================== */
 
-  const submit = (name) => {
-    if (!text.trim()) return;
-    onAddReview(name, { by: "คุณ", rating, text });
-    setText(""); setOpenFor(null); setRating(5);
-  };
-
+function LoginScreen({ onLogin }) {
+  const [role, setRole] = useState("student");
+  const roles = [
+    { key: "student", label: "นักศึกษา", icon: GraduationCap },
+    { key: "advisor", label: "อาจารย์นิเทศ", icon: School },
+    { key: "hr", label: "HR ของบริษัท", icon: Building },
+    { key: "admin", label: "เจ้าหน้าที่มหาวิทยาลัย", icon: ShieldCheck },
+  ];
   return (
-    <div>
-      <SectionHeader eyebrow="FR-16" title="รีวิวบริษัท" desc="อ่านประสบการณ์จากรุ่นพี่ หรือแชร์รีวิวของคุณให้รุ่นน้อง" />
-      {companies.map((c) => (
-        <Card key={c.name} style={{ marginBottom: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div>
-              <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: T.navy }}>{c.name}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3 }}>
-                <Star size={13} fill={T.gold} color={T.gold} />
-                <span style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text, fontWeight: 600 }}>{c.rating}</span>
-                <span style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: T.muted }}>({c.reviews.length} รีวิว)</span>
-              </div>
-            </div>
-            <button onClick={() => setOpenFor(openFor === c.name ? null : c.name)} style={btnGhost()}>เขียนรีวิว</button>
+    <div style={{ background: C.bg }} className="min-h-screen flex flex-col">
+      <header className="flex items-center justify-between px-10 py-5 bg-white border-b" style={{ borderColor: C.border }}>
+        <div className="flex items-center gap-2.5">
+          <div style={{ background: C.navy }} className="w-9 h-9 rounded-md flex items-center justify-center">
+            <GraduationCap size={20} color="#fff" />
           </div>
-          {openFor === c.name && (
-            <div style={{ marginTop: 12, padding: 12, background: T.paper, borderRadius: 8 }}>
-              <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <Star key={n} size={18} fill={n <= rating ? T.gold : "none"} color={T.gold} style={{ cursor: "pointer" }} onClick={() => setRating(n)} />
-                ))}
-              </div>
-              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder="แบ่งปันประสบการณ์การฝึกงานที่นี่" style={{ ...inputStyle(), resize: "vertical" }} />
-              <button onClick={() => submit(c.name)} style={btnPrimary({ marginTop: 8 })}>ส่งรีวิว</button>
+          <span style={{ color: C.navy }} className="font-bold text-xl">UniIntern</span>
+        </div>
+        <div className="flex gap-8 text-sm font-medium" style={{ color: C.textBody }}>
+          <span>ประโยชน์</span><span>วิธีการทำงาน</span><span>สิทธิ</span>
+        </div>
+      </header>
+
+      <div className="flex-1 flex items-center justify-center px-6 py-14">
+        <div className="max-w-5xl w-full grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <h1 style={{ color: C.navy }} className="text-4xl font-bold leading-tight mb-4">
+              เชื่อมช่องว่างระหว่างมหาวิทยาลัย<br />และสายอาชีพ
+            </h1>
+            <p style={{ color: C.textMuted }} className="text-base mb-6 leading-relaxed">
+              UniIntern เพิ่มความคล่องตัวในกระบวนการฝึกงานสำหรับนักศึกษา มหาวิทยาลัย และสถานประกอบการ จัดการคำร้อง เอกสาร การนิเทศ และการประเมินในแพลตฟอร์มเดียวที่ปลอดภัย
+            </p>
+            <div className="flex gap-3">
+              <Btn variant="primary" icon={ArrowRight}>เข้าใช้พอร์ทัล</Btn>
+              <Btn variant="outline">สำรวจจุดเด่นบริการ</Btn>
             </div>
-          )}
-          <div style={{ marginTop: 12 }}>
-            {c.reviews.map((r, i) => (
-              <div key={i} style={{ borderTop: `1px solid ${T.border}`, padding: "8px 0" }}>
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <span style={{ fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: T.navy }}>{r.by}</span>
-                  <div style={{ display: "flex" }}>{Array.from({ length: r.rating }).map((_, j) => <Star key={j} size={11} fill={T.gold} color={T.gold} />)}</div>
+          </div>
+
+          <Card className="p-7">
+            <h3 style={{ color: C.navy }} className="font-bold text-lg mb-1">ยินดีต้อนรับกลับมา</h3>
+            <p style={{ color: C.textMuted }} className="text-sm mb-5">เลือกบทบาทของคุณเพื่อเข้าสู่พอร์ทัล UniIntern</p>
+
+            <div className="grid grid-cols-2 gap-2.5 mb-5">
+              {roles.map((r) => (
+                <button
+                  key={r.key}
+                  onClick={() => setRole(r.key)}
+                  className="flex items-center gap-2 px-3 py-3 rounded border text-sm font-medium transition"
+                  style={{
+                    borderColor: role === r.key ? C.primary : C.border,
+                    background: role === r.key ? "#EBF8FF" : "#fff",
+                    color: role === r.key ? C.primary : C.textBody,
+                  }}
+                >
+                  <r.icon size={16} /> {r.label}
+                </button>
+              ))}
+            </div>
+
+            <label className="text-xs font-semibold" style={{ color: C.textBody }}>ชื่อผู้ใช้ / รหัสนักศึกษา</label>
+            <input defaultValue="demo@uniintern.ac.th" className="w-full mt-1.5 mb-4 px-3 py-2.5 rounded border text-sm outline-none" style={{ borderColor: C.border }} />
+            <label className="text-xs font-semibold" style={{ color: C.textBody }}>รหัสผ่าน</label>
+            <input type="password" defaultValue="••••••••" className="w-full mt-1.5 mb-6 px-3 py-2.5 rounded border text-sm outline-none" style={{ borderColor: C.border }} />
+
+            <Btn variant="primary" icon={ArrowRight} className="w-full" onClick={() => onLogin(role)}>เข้าสู่ระบบ</Btn>
+            <p className="text-center text-xs mt-4" style={{ color: C.textMuted }}>เดโมนี้ใช้ข้อมูลจำลอง — กดปุ่มด้านบนเพื่อเข้าชมได้ทันที</p>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================== STUDENT PAGES ============================== */
+
+function StudentDashboard() {
+  return (
+    <div className="grid lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 space-y-6">
+        <Card className="p-6">
+          <h3 className="font-bold mb-4" style={{ color: C.navy }}>สถานะคำร้องปัจจุบัน</h3>
+          <div className="flex items-center mb-3">
+            {APP_STEPS.map((s, i) => (
+              <React.Fragment key={s}>
+                <div className="flex flex-col items-center" style={{ width: 90 }}>
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ background: i <= 2 ? C.navy : "#EDF2F7", color: i <= 2 ? "#fff" : C.textMuted }}
+                  >
+                    {i < 2 ? <Check size={14} /> : i + 1}
+                  </div>
+                  <span className="text-[10px] text-center mt-1.5 leading-tight" style={{ color: i <= 2 ? C.textBody : C.textMuted }}>{s}</span>
                 </div>
-                <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text, marginTop: 3, lineHeight: 1.5 }}>{r.text}</div>
-              </div>
+                {i < APP_STEPS.length - 1 && <div className="flex-1 h-0.5" style={{ background: i < 2 ? C.success : "#EDF2F7" }} />}
+              </React.Fragment>
             ))}
-            {c.reviews.length === 0 && <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: T.muted, paddingTop: 8 }}>ยังไม่มีรีวิว เป็นคนแรกที่แบ่งปันประสบการณ์</div>}
+          </div>
+          <div className="rounded p-4 flex gap-3 items-start" style={{ background: "#F1F5F9" }}>
+            <AlertCircle size={18} style={{ color: C.primary }} className="mt-0.5" />
+            <div>
+              <div className="text-sm font-semibold" style={{ color: C.text }}>รอการลงนามจากอาจารย์</div>
+              <div className="text-sm mt-0.5" style={{ color: C.textMuted }}>คำร้องของคุณที่ TechCorp Inc. กำลังรอการตรวจสอบและลงนามจาก ผศ.ดร. วิศวะ เก่งการ โดยปกติจะใช้เวลา 2-3 วันทำการ</div>
+            </div>
           </div>
         </Card>
-      ))}
-    </div>
-  );
-}
 
-function ChatView({ messages, onSend, selfKey, otherLabel, selfLabel }) {
-  const [text, setText] = useState("");
-  const send = () => {
-    if (!text.trim()) return;
-    onSend(text);
-    setText("");
-  };
-  return (
-    <div>
-      <SectionHeader eyebrow="FR-14" title={`แชทกับ${otherLabel}`} desc="ส่งข้อความถึงกันได้โดยตรงในระบบ" />
-      <Card style={{ display: "flex", flexDirection: "column", height: 420 }}>
-        <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 10, paddingRight: 4 }}>
-          {messages.map((m, i) => {
-            const mine = m.from === selfKey;
-            return (
-              <div key={i} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
-                <div style={{
-                  background: mine ? T.navy : T.paper, color: mine ? "#fff" : T.text,
-                  fontFamily: FONT_BODY, fontSize: 13, padding: "9px 13px", borderRadius: 12,
-                  borderBottomRightRadius: mine ? 3 : 12, borderBottomLeftRadius: mine ? 12 : 3, lineHeight: 1.5,
-                }}>{m.text}</div>
-                <div style={{ fontFamily: FONT_BODY, fontSize: 10.5, color: T.muted, marginTop: 3, textAlign: mine ? "right" : "left" }}>{mine ? selfLabel : otherLabel} · {m.time}</div>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{ display: "flex", gap: 8, marginTop: 12, borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
-          <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} placeholder="พิมพ์ข้อความ" style={inputStyle()} />
-          <button onClick={send} style={btnPrimary({ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 })}><Send size={14} /> ส่ง</button>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-/* ---------- ADVISOR VIEWS ---------- */
-
-function AdvisorQueue({ requests, onApprove, onReject }) {
-  const [signing, setSigning] = useState(null);
-  const [sig, setSig] = useState("");
-  const pending = requests.filter((r) => r.status === "pending_advisor");
-  return (
-    <div>
-      <SectionHeader eyebrow="FR-03 / FR-05" title="คำร้องรออนุมัติ" desc="ตรวจสอบรายละเอียดคำร้อง แล้วลงลายเซ็นอิเล็กทรอนิกส์เพื่ออนุมัติ" />
-      {pending.length === 0 && <Card><div style={{ fontFamily: FONT_BODY, fontSize: 13, color: T.muted, textAlign: "center", padding: 20 }}>ไม่มีคำร้องที่รออนุมัติในขณะนี้</div></Card>}
-      {pending.map((r) => (
-        <Card key={r.id} style={{ marginBottom: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-            <div>
-              <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: T.navy }}>{r.studentName}</div>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.muted }}>{r.company} · {r.position}</div>
-            </div>
-            <Badge tone="amber">รออนุมัติ</Badge>
+        <Card className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold" style={{ color: C.navy }}>บันทึกการทำงานล่าสุด</h3>
+            <button className="text-sm font-semibold flex items-center gap-1" style={{ color: C.primary }}><Plus size={15} />เพิ่มใหม่</button>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontFamily: FONT_BODY, fontSize: 12.5, color: T.text, marginBottom: 12 }}>
-            <div><MapPin size={12} style={{ verticalAlign: -1 }} color={T.muted} /> {r.address}</div>
-            <div><Phone size={12} style={{ verticalAlign: -1 }} color={T.muted} /> {r.phone}</div>
-            <div><Mail size={12} style={{ verticalAlign: -1 }} color={T.muted} /> {r.email}</div>
-            <div><CalendarClock size={12} style={{ verticalAlign: -1 }} color={T.muted} /> {fmtDate(r.start)} – {fmtDate(r.end)}</div>
-          </div>
-          {signing === r.id ? (
-            <div style={{ background: T.paper, borderRadius: 8, padding: 12 }}>
-              <label style={labelStyle()}>เซ็นชื่ออนุมัติ (พิมพ์ชื่อ-นามสกุล)</label>
-              <input value={sig} onChange={(e) => setSig(e.target.value)} placeholder="อ.ดร.ปิยะ วัฒนกุล" style={inputStyle()} />
-              {sig && <div style={{ fontFamily: "'Noto Serif Thai', serif", fontStyle: "italic", fontSize: 20, color: T.navy, borderBottom: `2px solid ${T.gold}`, padding: "10px 4px", marginTop: 10 }}>{sig}</div>}
-              <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                <button disabled={!sig.trim()} onClick={() => { onApprove(r.id, sig); setSigning(null); setSig(""); }} style={btnGold({ opacity: sig.trim() ? 1 : 0.5, display: "flex", alignItems: "center", gap: 6 })}><PenLine size={14} /> ยืนยันลายเซ็นและอนุมัติ</button>
-                <button onClick={() => { setSigning(null); setSig(""); }} style={btnGhost()}>ยกเลิก</button>
+          <div className="space-y-3">
+            {LOGS.map((l) => (
+              <div key={l.week} className="rounded border p-4" style={{ borderColor: C.border }}>
+                <div className="flex justify-between text-sm font-semibold mb-1" style={{ color: C.text }}>
+                  <span>สัปดาห์ที่ {l.week}</span>
+                  <span style={{ color: C.textMuted, fontWeight: 400 }}>{l.date}</span>
+                </div>
+                <p className="text-sm" style={{ color: C.textMuted }}>{l.detail}</p>
               </div>
-            </div>
-          ) : (
-            <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => setSigning(r.id)} style={btnGold({ display: "flex", alignItems: "center", gap: 6 })}><PenLine size={14} /> อนุมัติและลงลายเซ็น</button>
-              <button onClick={() => onReject(r.id)} style={btnGhost()}>ส่งกลับแก้ไข</button>
-            </div>
-          )}
+            ))}
+          </div>
         </Card>
-      ))}
+      </div>
+
+      <div className="space-y-6">
+        <Card className="p-6">
+          <div className="flex justify-between mb-4">
+            <h3 className="font-bold" style={{ color: C.navy }}>ข้อมูลส่วนตัว</h3>
+            <PenTool size={15} style={{ color: C.textMuted }} />
+          </div>
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar initials="สจ" size={48} />
+            <div>
+              <div className="font-semibold text-sm" style={{ color: C.text }}>สมชาย ใจดี</div>
+              <div className="text-xs" style={{ color: C.textMuted }}>วิศวกรรมคอมพิวเตอร์ ปี 3</div>
+            </div>
+          </div>
+          <div className="space-y-2.5 text-sm">
+            <div className="flex gap-2 items-center" style={{ color: C.textBody }}><Mail size={14} style={{ color: C.textMuted }} /> s.jaidee@university.ac.th</div>
+            <div className="flex gap-2 items-center" style={{ color: C.textBody }}><FileText size={14} style={{ color: C.textMuted }} /> รหัสนักศึกษา 630123456</div>
+            <div className="flex gap-2 items-center" style={{ color: C.textBody }}><Building size={14} style={{ color: C.textMuted }} /> คณะวิศวกรรมศาสตร์</div>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="font-bold mb-4" style={{ color: C.navy }}>การแจ้งเตือนล่าสุด</h3>
+          <div className="space-y-4">
+            {NOTIFICATIONS.map((n) => (
+              <div key={n.id} className="flex gap-2.5">
+                <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: n.tone === "warning" ? C.warning : n.tone === "success" ? C.success : C.primary }} />
+                <div>
+                  <div className="text-sm font-semibold" style={{ color: C.text }}>{n.title}</div>
+                  <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>{n.body}</div>
+                  <div className="text-[11px] mt-1" style={{ color: "#A0AEC0" }}>{n.time}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Btn variant="primary" icon={Search} className="py-4">ค้นหาบริษัท</Btn>
+          <Btn variant="accent" icon={Sparkles} className="py-4">จับคู่ด้วย AI</Btn>
+        </div>
+      </div>
     </div>
   );
 }
 
-function AdvisorLogbook({ students, entries, onComment }) {
-  const [studentId, setStudentId] = useState(students[0]?.id);
-  const [drafts, setDrafts] = useState({});
-  const list = entries.filter((e) => e.studentId === studentId);
+function StudentApplication() {
+  const [step, setStep] = useState(2);
+  const steps = ["ข้อมูลนักศึกษา", "ข้อมูลบริษัท", "ระยะเวลาฝึกงาน"];
   return (
-    <div>
-      <SectionHeader eyebrow="FR-10" title="ตรวจ Logbook นักศึกษา" desc="เลือกนักศึกษาในความดูแลเพื่อตรวจงานและแสดงความคิดเห็น" />
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        {students.map((s) => (
-          <button key={s.id} onClick={() => setStudentId(s.id)} style={{
-            fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, padding: "7px 14px", borderRadius: 999, cursor: "pointer",
-            border: `1px solid ${studentId === s.id ? T.gold : T.border}`, background: studentId === s.id ? T.goldPale : "#fff", color: studentId === s.id ? T.goldDark : T.text,
-          }}>{s.name}</button>
+    <Card className="p-7 max-w-4xl">
+      <div className="flex justify-between items-center mb-2">
+        <div>
+          <h3 className="font-bold text-lg" style={{ color: C.navy }}>ใบสมัครฝึกงาน</h3>
+          <p className="text-xs" style={{ color: C.textMuted }}>แบบฟอร์ม FR-02: กรอกรายละเอียดด้านล่างเพื่อส่งคำขอฝึกงานของคุณ</p>
+        </div>
+        <Btn variant="outline" size="sm">บันทึกร่าง</Btn>
+      </div>
+
+      <div className="flex items-center my-6">
+        {steps.map((s, i) => (
+          <React.Fragment key={s}>
+            <div className="flex flex-col items-center" style={{ width: 120 }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: i + 1 <= step ? C.navy : "#EDF2F7", color: i + 1 <= step ? "#fff" : C.textMuted }}>
+                {i + 1 < step ? <Check size={13} /> : i + 1}
+              </div>
+              <span className="text-[11px] mt-1" style={{ color: C.textMuted }}>{s}</span>
+            </div>
+            {i < steps.length - 1 && <div className="flex-1 h-0.5 -mt-4" style={{ background: i + 1 < step ? C.navy : "#EDF2F7" }} />}
+          </React.Fragment>
         ))}
       </div>
-      {list.length === 0 && <Card><div style={{ fontFamily: FONT_BODY, fontSize: 13, color: T.muted, textAlign: "center", padding: 20 }}>นักศึกษาคนนี้ยังไม่มีบันทึก Logbook</div></Card>}
-      {list.map((e) => (
-        <Card key={e.id} style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.gold, fontWeight: 700 }}>{fmtDate(e.date)}</span>
-            <span style={{ fontFamily: FONT_BODY, fontSize: 12, color: T.muted }}>{e.hours} ชั่วโมง</span>
-          </div>
-          <p style={{ fontFamily: FONT_BODY, fontSize: 13, color: T.text, margin: "6px 0" }}>{e.task}</p>
-          {e.comment ? (
-            <div style={{ background: T.paper, borderRadius: 8, padding: "8px 10px", fontFamily: FONT_BODY, fontSize: 12.5, color: T.text }}><b style={{ color: T.gold }}>ความคิดเห็นของคุณ: </b>{e.comment}</div>
-          ) : (
-            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-              <input value={drafts[e.id] || ""} onChange={(ev) => setDrafts((d) => ({ ...d, [e.id]: ev.target.value }))} placeholder="แสดงความคิดเห็นต่อบันทึกนี้" style={inputStyle()} />
-              <button onClick={() => { if (drafts[e.id]?.trim()) { onComment(e.id, drafts[e.id]); setDrafts((d) => ({ ...d, [e.id]: "" })); } }} style={btnGhost({ flexShrink: 0 })}>ส่ง</button>
-            </div>
-          )}
-        </Card>
-      ))}
-    </div>
-  );
-}
 
-function AdvisorMeetings({ meetings, onAdd, students }) {
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ student: students[0]?.name, date: "", time: "", platform: "Google Meet" });
-  return (
-    <div>
-      <SectionHeader eyebrow="FR-12" title="นัดนิเทศออนไลน์" desc="จัดตารางนิเทศผ่าน Google Meet หรือ Zoom" />
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-        <button onClick={() => setOpen(!open)} style={btnGold({ display: "flex", alignItems: "center", gap: 6 })}><Plus size={14} /> นัดหมายใหม่</button>
+      <div className="border-t pt-5" style={{ borderColor: C.border }}>
+        <h4 className="font-semibold text-sm flex items-center gap-2 mb-4" style={{ color: C.text }}><Building2 size={16} /> 2. ข้อมูลบริษัท</h4>
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="text-xs font-semibold" style={{ color: C.textBody }}>ชื่อบริษัท *</label>
+            <div className="relative mt-1.5">
+              <input defaultValue="TechCorp Solutions Co., Ltd." className="w-full px-3 py-2.5 rounded border text-sm outline-none pr-24" style={{ borderColor: C.border }} />
+              <StatusChip tone="success">ยืนยันแล้ว</StatusChip>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-semibold" style={{ color: C.textBody }}>ตำแหน่งที่สมัคร *</label>
+            <input placeholder="เช่น นักศึกษาฝึกงานวิศวกรซอฟต์แวร์" className="w-full mt-1.5 px-3 py-2.5 rounded border text-sm outline-none" style={{ borderColor: C.border }} />
+          </div>
+        </div>
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label className="text-xs font-semibold" style={{ color: C.textBody }}>เบอร์โทรศัพท์ติดต่อ *</label>
+            <input defaultValue="02-987-6543" className="w-full mt-1.5 px-3 py-2.5 rounded border text-sm outline-none" style={{ borderColor: C.border }} />
+          </div>
+          <div>
+            <label className="text-xs font-semibold" style={{ color: C.textBody }}>อีเมลติดต่อ *</label>
+            <input defaultValue="hr@techcorp.co.th" className="w-full mt-1.5 px-3 py-2.5 rounded border text-sm outline-none" style={{ borderColor: C.border }} />
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <Btn variant="ghost" icon={ChevronLeft} onClick={() => setStep(Math.max(1, step - 1))}>ย้อนกลับ</Btn>
+          <Btn variant="primary" onClick={() => setStep(Math.min(3, step + 1))}>ถัดไป: ระยะเวลาฝึกงาน</Btn>
+        </div>
       </div>
-      {open && (
-        <Card style={{ marginBottom: 16 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
-            <div><label style={labelStyle()}>นักศึกษา</label>
-              <select value={form.student} onChange={(e) => setForm({ ...form, student: e.target.value })} style={inputStyle()}>
-                {students.map((s) => <option key={s.id}>{s.name}</option>)}
-              </select>
-            </div>
-            <div><label style={labelStyle()}>วันที่</label><input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} style={inputStyle()} /></div>
-            <div><label style={labelStyle()}>เวลา</label><input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} style={inputStyle()} /></div>
-            <div><label style={labelStyle()}>แพลตฟอร์ม</label>
-              <select value={form.platform} onChange={(e) => setForm({ ...form, platform: e.target.value })} style={inputStyle()}>
-                <option>Google Meet</option><option>Zoom</option>
-              </select>
-            </div>
-          </div>
-          <button onClick={() => { if (form.date && form.time) { onAdd({ ...form, link: form.platform === "Zoom" ? "zoom.us/j/" + Math.floor(Math.random() * 9000000000 + 1000000000) : "meet.google.com/" + Math.random().toString(36).slice(2, 9) }); setOpen(false); } }} style={btnPrimary({ marginTop: 12 })}>ยืนยันนัดหมาย</button>
-        </Card>
+    </Card>
+  );
+}
+
+function StudentCompanies() {
+  const [tab, setTab] = useState("reviews");
+  return (
+    <div>
+      <div className="flex justify-between items-start mb-5">
+        <p style={{ color: C.textMuted }} className="text-sm max-w-xl">ค้นหาประสบการณ์ฝึกงานจริงจากรุ่นพี่ พร้อมเทคนิคการสัมภาษณ์และตัวอย่าง Resume เพื่อเตรียมความพร้อมสู่โลกการทำงาน</p>
+        <Btn variant="accent" icon={PenTool}>แชร์ประสบการณ์</Btn>
+      </div>
+      <div className="flex gap-2 mb-5">
+        {[["reviews", "รีวิวล่าสุด"], ["ai", "แนะนำโดย AI"]].map(([k, l]) => (
+          <button key={k} onClick={() => setTab(k)} className="px-4 py-2 rounded-full text-sm font-semibold" style={{ background: tab === k ? C.navy : "#fff", color: tab === k ? "#fff" : C.textBody, border: `1px solid ${tab === k ? C.navy : C.border}` }}>{l}</button>
+        ))}
+      </div>
+
+      {tab === "ai" ? (
+        <div className="grid md:grid-cols-2 gap-5">
+          {COMPANIES.filter((c) => c.match).map((c) => (
+            <Card key={c.id} className="p-5" accent={C.primary}>
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-3">
+                  <div style={{ background: "#EBF3FC" }} className="w-12 h-12 rounded flex items-center justify-center"><Building2 size={22} style={{ color: C.primary }} /></div>
+                  <div>
+                    <div className="font-bold text-sm flex items-center gap-1" style={{ color: C.text }}>{c.name} {c.verified && <ShieldCheck size={14} style={{ color: C.primary }} />}</div>
+                    <div className="text-xs" style={{ color: C.textMuted }}>{c.industry} • {c.location}</div>
+                  </div>
+                </div>
+                <StatusChip tone="success">ความเหมาะสม {c.match}%</StatusChip>
+              </div>
+              <div className="text-xs mb-1" style={{ color: C.textMuted }}>ความเหมาะสมทักษะ: {c.tags.join(", ")}</div>
+              <ProgressBar value={c.match} />
+              <div className="flex gap-2 mt-4">
+                <Btn variant="primary" size="sm">ดูโปรไฟล์ & สมัคร</Btn>
+                <Btn variant="outline" size="sm">อ่านรีวิว</Btn>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-5 max-w-3xl">
+          {REVIEWS.map((r) => (
+            <Card key={r.company} className="p-5">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="font-bold" style={{ color: C.text }}>{r.company}</div>
+                  <div className="text-xs" style={{ color: C.textMuted }}>{r.role}</div>
+                </div>
+                <StatusChip tone="warning"><Star size={11} className="inline -mt-0.5 mr-0.5" fill="#8A6D1A" />{r.rating}</StatusChip>
+              </div>
+              <div className="grid md:grid-cols-2 gap-3 mb-3">
+                <div className="rounded p-3" style={{ background: C.successBg }}>
+                  <div className="text-xs font-bold mb-1.5" style={{ color: "#1E7B44" }}>✓ ข้อดี (Pros)</div>
+                  <ul className="text-xs space-y-1 list-disc pl-4" style={{ color: C.textBody }}>{r.pros.map((p) => <li key={p}>{p}</li>)}</ul>
+                </div>
+                <div className="rounded p-3" style={{ background: C.errorBg }}>
+                  <div className="text-xs font-bold mb-1.5" style={{ color: C.error }}>⚠ ข้อควรระวัง (Cons)</div>
+                  <ul className="text-xs space-y-1 list-disc pl-4" style={{ color: C.textBody }}>{r.cons.map((p) => <li key={p}>{p}</li>)}</ul>
+                </div>
+              </div>
+              <div className="flex justify-between items-center text-xs" style={{ color: C.textMuted }}>
+                <span>{r.author} · {r.term}</span>
+                <span className="flex items-center gap-1"><ThumbsUp size={13} /> {r.likes}</span>
+              </div>
+            </Card>
+          ))}
+        </div>
       )}
-      {meetings.map((m) => (
-        <Card key={m.id} style={{ marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 38, height: 38, borderRadius: 8, background: T.navyPale, display: "flex", alignItems: "center", justifyContent: "center" }}><Video size={17} color={T.navy} /></div>
-            <div>
-              <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy }}>{m.student}</div>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: T.muted }}>{fmtDate(m.date)} · {m.time} น. · {m.platform}</div>
-            </div>
-          </div>
-          <span style={{ fontFamily: FONT_MONO, fontSize: 11.5, color: T.gold }}>{m.link}</span>
-        </Card>
-      ))}
     </div>
   );
 }
 
-/* ---------- STAFF VIEWS ---------- */
+function DocsTable({ rows, actionLabel = "ดูรายละเอียด" }) {
+  return (
+    <Card>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left" style={{ color: C.textMuted, borderBottom: `1px solid ${C.border}` }}>
+            <th className="px-5 py-3 font-semibold text-xs">ชื่อนักศึกษา</th>
+            <th className="px-5 py-3 font-semibold text-xs">ประเภทเอกสาร</th>
+            <th className="px-5 py-3 font-semibold text-xs">สถานะ</th>
+            <th className="px-5 py-3 font-semibold text-xs">วันที่ร้องขอ</th>
+            <th className="px-5 py-3 font-semibold text-xs text-right">การดำเนินการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((d, i) => (
+            <tr key={i} style={{ borderBottom: i < rows.length - 1 ? `1px solid ${C.border}` : "none" }}>
+              <td className="px-5 py-3.5">
+                <div className="font-semibold" style={{ color: C.text }}>{d.name}</div>
+                <div className="text-xs" style={{ color: C.textMuted }}>รหัสนักศึกษา: {d.code}</div>
+              </td>
+              <td className="px-5 py-3.5" style={{ color: C.textBody }}>{d.type}</td>
+              <td className="px-5 py-3.5"><StatusChip tone={d.tone}>{d.status}</StatusChip></td>
+              <td className="px-5 py-3.5" style={{ color: C.textMuted }}>{d.date}</td>
+              <td className="px-5 py-3.5 text-right font-semibold" style={{ color: C.primary }}>{actionLabel}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Card>
+  );
+}
 
-function StaffOverview() {
-  const monthly = [
-    { m: "มิ.ย.", n: 12 }, { m: "ก.ค.", n: 18 }, { m: "ส.ค.", n: 25 },
-    { m: "ก.ย.", n: 40 }, { m: "ต.ค.", n: 35 }, { m: "พ.ย.", n: 26 },
-  ];
-  const pie = [{ name: "บริษัทตอบรับ", value: 87 }, { name: "รอดำเนินการ", value: 9 }, { name: "ปฏิเสธ", value: 4 }];
-  const pieColors = [T.green, T.amber, T.red];
-  const topCompanies = [["บริษัท ทรู ดิจิทัล กรุ๊ป จำกัด", 14], ["บริษัท ปตท. จำกัด (มหาชน)", 11], ["บริษัท เอสซีจี จำกัด (มหาชน)", 9], ["ธนาคารกรุงไทย จำกัด (มหาชน)", 8]];
-  const topPositions = [["Frontend Developer Intern", 22], ["Data Analyst Intern", 19], ["Business Analyst Intern", 15], ["IT Support Intern", 13]];
+function StudentDocuments() {
   return (
     <div>
-      <SectionHeader eyebrow="FR-15" title="ภาพรวมระบบ" desc="สถิติภาพรวมการฝึกงานของนักศึกษาในภาคเรียนนี้" />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 16 }}>
-        {[["นักศึกษาที่กำลังฝึกงาน", "128"], ["คำร้องทั้งหมด", "156"], ["อัตราตอบรับ", "87%"], ["บริษัทที่ร่วมมือ", "64"]].map(([l, v]) => (
-          <Card key={l} style={{ padding: "16px 18px" }}>
-            <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: T.muted }}>{l}</div>
-            <div style={{ fontFamily: FONT_DISPLAY, fontSize: 26, fontWeight: 700, color: T.navy, marginTop: 4 }}>{v}</div>
+      <div className="flex justify-between mb-5">
+        <p className="text-sm" style={{ color: C.textMuted }}>ติดตามสถานะเอกสารฝึกงานของคุณ และอัปโหลดไฟล์ที่จำเป็น</p>
+        <Btn variant="primary" icon={Upload}>อัปโหลดเอกสาร</Btn>
+      </div>
+      <DocsTable rows={DOCS.filter((d) => d.name === "Sarah Jenkins" || true).slice(0, 2)} />
+    </div>
+  );
+}
+
+function StudentAppointments() {
+  const a = APPOINTMENTS[0];
+  return (
+    <div className="grid lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 space-y-6">
+        <div>
+          <h3 className="font-bold mb-3" style={{ color: C.navy }}>การนัดหมายที่กำลังจะมาถึง</h3>
+          <Card className="p-5 flex items-center gap-5 flex-wrap">
+            <div className="text-center rounded px-3 py-2" style={{ background: C.navy, color: "#fff", minWidth: 64 }}>
+              <div className="text-[10px] uppercase">Nov</div>
+              <div className="text-xl font-bold">15</div>
+            </div>
+            <div className="flex-1 min-w-[220px]">
+              <div className="font-semibold text-sm" style={{ color: C.text }}>{a.title}</div>
+              <div className="text-xs flex items-center gap-3 mt-1" style={{ color: C.textMuted }}>
+                <span className="flex items-center gap-1"><Clock size={12} />{a.time}</span>
+                <span className="flex items-center gap-1"><Users size={12} />{a.advisor}</span>
+                <span className="flex items-center gap-1"><Video size={12} />{a.platform}</span>
+              </div>
+              <div className="mt-1.5"><StatusChip tone="success">{a.status}</StatusChip></div>
+            </div>
+            <div className="flex gap-2">
+              <Btn variant="outline" size="sm">เลื่อน/ยกเลิก</Btn>
+              <Btn variant="accent" size="sm" icon={ExternalLink}>เข้าร่วมประชุม</Btn>
+            </div>
+          </Card>
+        </div>
+
+        <Card className="p-6">
+          <h3 className="font-bold mb-4 flex items-center gap-2" style={{ color: C.navy }}><Calendar size={17} /> สร้างการนัดหมายใหม่</h3>
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="text-xs font-semibold" style={{ color: C.textBody }}>อาจารย์นิเทศ *</label>
+              <select className="w-full mt-1.5 px-3 py-2.5 rounded border text-sm outline-none" style={{ borderColor: C.border, color: C.textBody }}>
+                <option>ผศ.ดร. วิศวะ เก่งการ</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold" style={{ color: C.textBody }}>แพลตฟอร์ม *</label>
+              <div className="flex gap-2 mt-1.5">
+                <Btn variant="accent" size="sm" icon={Video} className="flex-1">Google Meet</Btn>
+                <Btn variant="outline" size="sm" className="flex-1">Zoom</Btn>
+              </div>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="text-xs font-semibold" style={{ color: C.textBody }}>วันที่ต้องการนัดหมาย *</label>
+              <input type="date" className="w-full mt-1.5 px-3 py-2.5 rounded border text-sm outline-none" style={{ borderColor: C.border }} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold" style={{ color: C.textBody }}>เวลา *</label>
+              <select className="w-full mt-1.5 px-3 py-2.5 rounded border text-sm outline-none" style={{ borderColor: C.border, color: C.textBody }}>
+                <option>เลือกเวลา...</option>
+              </select>
+            </div>
+          </div>
+          <label className="text-xs font-semibold" style={{ color: C.textBody }}>หัวข้อที่ต้องการปรึกษา/วาระการนิเทศ *</label>
+          <textarea rows={3} placeholder="ระบุหัวข้อหรือคำถามที่ต้องการปรึกษาล่วงหน้า เพื่อให้อาจารย์นิเทศเตรียมตัว..." className="w-full mt-1.5 mb-4 px-3 py-2.5 rounded border text-sm outline-none resize-none" style={{ borderColor: C.border }} />
+          <Btn variant="primary">ส่งคำขอนัดหมาย</Btn>
+        </Card>
+      </div>
+
+      <Card className="p-6 h-fit">
+        <h3 className="font-bold mb-4 flex items-center gap-2" style={{ color: C.navy }}><AlertCircle size={16} style={{ color: C.primary }} />ข้อควรรู้ในการนิเทศ</h3>
+        <ul className="space-y-3 text-sm" style={{ color: C.textBody }}>
+          {["ควรส่งคำขอนัดหมายล่วงหน้าอย่างน้อย 3 วันทำการ", "เตรียมรายงานความคืบหน้า (Progress Report) ส่งล่วงหน้า 1 วัน", "หากต้องการยกเลิก ควรทำล่วงหน้า 24 ชั่วโมง"].map((t) => (
+            <li key={t} className="flex gap-2"><Check size={15} style={{ color: C.success }} className="mt-0.5 shrink-0" />{t}</li>
+          ))}
+        </ul>
+      </Card>
+    </div>
+  );
+}
+
+function StudentLogbook() {
+  return (
+    <Card className="p-6 max-w-2xl">
+      <div className="flex justify-between mb-4">
+        <h3 className="font-bold" style={{ color: C.navy }}>เขียนบันทึกประจำสัปดาห์</h3>
+        <StatusChip tone="warning">สัปดาห์ที่ 4 — ยังไม่ส่ง</StatusChip>
+      </div>
+      <label className="text-xs font-semibold" style={{ color: C.textBody }}>รายละเอียดงานสัปดาห์นี้</label>
+      <textarea rows={5} placeholder="สรุปงานที่ทำ, สิ่งที่เรียนรู้..." className="w-full mt-1.5 mb-4 px-3 py-2.5 rounded border text-sm outline-none resize-none" style={{ borderColor: C.border }} />
+      <label className="text-xs font-semibold" style={{ color: C.textBody }}>ปัญหาและอุปสรรค</label>
+      <textarea rows={3} placeholder="ระบุปัญหาที่พบ (ถ้ามี)..." className="w-full mt-1.5 mb-4 px-3 py-2.5 rounded border text-sm outline-none resize-none" style={{ borderColor: C.border }} />
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-20 h-20 rounded border-2 border-dashed flex items-center justify-center" style={{ borderColor: C.border }}><ImagePlus size={20} style={{ color: C.textMuted }} /></div>
+        <span className="text-xs" style={{ color: C.textMuted }}>แนบรูปภาพประกอบ (ถ้ามี)</span>
+      </div>
+      <Btn variant="primary">ส่ง Logbook สัปดาห์นี้</Btn>
+
+      <div className="mt-8 pt-5 border-t" style={{ borderColor: C.border }}>
+        <h4 className="font-semibold text-sm mb-3" style={{ color: C.text }}>ประวัติที่ผ่านมา</h4>
+        <div className="space-y-2">
+          {LOGS.map((l) => (
+            <div key={l.week} className="flex justify-between items-center text-sm border rounded px-3 py-2.5" style={{ borderColor: C.border }}>
+              <span style={{ color: C.text }}>สัปดาห์ที่ {l.week}</span>
+              <StatusChip tone="success">ตรวจแล้ว</StatusChip>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/* ============================== ADVISOR PAGES ============================== */
+
+function AdvisorDashboard() {
+  const stats = [
+    { label: "นักศึกษาในความดูแล", value: STUDENTS.length, icon: Users, tone: C.primary },
+    { label: "รอตรวจ Logbook", value: STUDENTS.filter((s) => s.logStatus === "รอตรวจ").length, icon: BookOpen, tone: C.warning },
+    { label: "นัดหมายรอยืนยัน", value: 2, icon: Video, tone: C.success },
+  ];
+  return (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-3 gap-5">
+        {stats.map((s) => (
+          <Card key={s.label} className="p-5 flex items-center gap-4">
+            <div style={{ background: "#EBF3FC" }} className="w-12 h-12 rounded flex items-center justify-center"><s.icon size={22} style={{ color: s.tone }} /></div>
+            <div>
+              <div className="text-2xl font-bold" style={{ color: C.navy }}>{s.value}</div>
+              <div className="text-xs" style={{ color: C.textMuted }}>{s.label}</div>
+            </div>
           </Card>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 }}>
-        <Card>
-          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy, marginBottom: 10 }}>จำนวนคำร้องต่อเดือน</div>
-          <div style={{ height: 220 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false} />
-                <XAxis dataKey="m" tick={{ fontFamily: FONT_BODY, fontSize: 12, fill: T.muted }} axisLine={{ stroke: T.border }} tickLine={false} />
-                <YAxis tick={{ fontFamily: FONT_BODY, fontSize: 12, fill: T.muted }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ fontFamily: FONT_BODY, fontSize: 12, borderRadius: 8, border: `1px solid ${T.border}` }} />
-                <Bar dataKey="n" fill={T.gold} radius={[4, 4, 0, 0]} name="คำร้อง" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-        <Card>
-          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy, marginBottom: 10 }}>สถิติการจ้างงาน</div>
-          <div style={{ height: 180 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={pie} dataKey="value" innerRadius={40} outerRadius={70} paddingAngle={2}>
-                  {pie.map((_, i) => <Cell key={i} fill={pieColors[i]} />)}
-                </Pie>
-                <Tooltip contentStyle={{ fontFamily: FONT_BODY, fontSize: 12, borderRadius: 8 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          {pie.map((p, i) => (
-            <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11.5, color: T.text, marginTop: 2 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: pieColors[i] }} /> {p.name} — {p.value}%
-            </div>
-          ))}
-        </Card>
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        <Card>
-          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy, marginBottom: 10 }}>บริษัทยอดนิยม</div>
-          {topCompanies.map(([n, c]) => (
-            <div key={n} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: `1px solid ${T.border}`, fontFamily: FONT_BODY, fontSize: 12.5 }}>
-              <span style={{ color: T.text }}>{n}</span><span style={{ color: T.gold, fontWeight: 700 }}>{c}</span>
-            </div>
-          ))}
-        </Card>
-        <Card>
-          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy, marginBottom: 10 }}>ตำแหน่งยอดนิยม</div>
-          {topPositions.map(([n, c]) => (
-            <div key={n} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: `1px solid ${T.border}`, fontFamily: FONT_BODY, fontSize: 12.5 }}>
-              <span style={{ color: T.text }}>{n}</span><span style={{ color: T.gold, fontWeight: 700 }}>{c}</span>
-            </div>
-          ))}
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-function StaffStudents({ students, requests }) {
-  const [q, setQ] = useState("");
-  const filtered = students.filter((s) => s.name.includes(q) || s.id.includes(q));
-  return (
-    <div>
-      <SectionHeader eyebrow="FR-01" title="ข้อมูลนักศึกษา" desc="จัดการข้อมูลนักศึกษาและตรวจสอบสถานะการฝึกงาน" />
-      <div style={{ position: "relative", marginBottom: 14, maxWidth: 320 }}>
-        <Search size={15} color={T.muted} style={{ position: "absolute", left: 12, top: 11 }} />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ค้นหาชื่อหรือรหัสนักศึกษา" style={{ ...inputStyle(), paddingLeft: 34 }} />
-      </div>
-      <Card style={{ padding: 0, overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: FONT_BODY, fontSize: 12.5 }}>
-          <thead>
-            <tr style={{ background: T.paper, textAlign: "left" }}>
-              {["รหัสนักศึกษา", "ชื่อ-นามสกุล", "สาขา", "สถานะการฝึกงาน"].map((h) => (
-                <th key={h} style={{ padding: "10px 16px", color: T.muted, fontWeight: 600 }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
+      <Card>
+        <div className="px-5 py-4 border-b font-bold" style={{ borderColor: C.border, color: C.navy }}>นักศึกษาในความดูแล</div>
+        <table className="w-full text-sm">
+          <thead><tr className="text-left" style={{ color: C.textMuted, borderBottom: `1px solid ${C.border}` }}>
+            <th className="px-5 py-3 text-xs font-semibold">นักศึกษา</th><th className="px-5 py-3 text-xs font-semibold">บริษัท</th><th className="px-5 py-3 text-xs font-semibold">Logbook</th><th className="px-5 py-3 text-xs font-semibold">สถานะคำร้อง</th>
+          </tr></thead>
           <tbody>
-            {filtered.map((s) => {
-              const req = requests.find((r) => r.studentId === s.id);
-              return (
-                <tr key={s.id} style={{ borderTop: `1px solid ${T.border}` }}>
-                  <td style={{ padding: "10px 16px", fontFamily: FONT_MONO, color: T.text }}>{s.id}</td>
-                  <td style={{ padding: "10px 16px", color: T.navy, fontWeight: 600 }}>{s.name}</td>
-                  <td style={{ padding: "10px 16px", color: T.text }}>{s.major}</td>
-                  <td style={{ padding: "10px 16px" }}>{req ? <Badge tone={statusTone(req.status)}>{STAGES.find((x) => x.key === req.status)?.label}</Badge> : <Badge tone="gray">ยังไม่ยื่นคำร้อง</Badge>}</td>
-                </tr>
-              );
-            })}
+            {STUDENTS.map((s, i) => (
+              <tr key={s.id} style={{ borderBottom: i < STUDENTS.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                <td className="px-5 py-3 flex items-center gap-2.5"><Avatar initials={s.initials} size={32} /><div><div className="font-semibold" style={{ color: C.text }}>{s.name}</div><div className="text-xs" style={{ color: C.textMuted }}>{s.code}</div></div></td>
+                <td className="px-5 py-3" style={{ color: C.textBody }}>{s.company}</td>
+                <td className="px-5 py-3"><StatusChip tone={s.logStatus === "ตรวจแล้ว" ? "success" : s.logStatus === "รอตรวจ" ? "warning" : "neutral"}>{s.logStatus}</StatusChip></td>
+                <td className="px-5 py-3" style={{ color: C.textMuted }}>{APP_STEPS[s.appStatus]}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </Card>
@@ -983,274 +791,415 @@ function StaffStudents({ students, requests }) {
   );
 }
 
-function StaffDocuments({ requests, onIssue, onSend }) {
-  const toIssue = requests.filter((r) => r.status === "approved");
-  const toSend = requests.filter((r) => r.status === "document_issued");
+function AdvisorStudents() {
   return (
-    <div>
-      <SectionHeader eyebrow="FR-04" title="สร้างและติดตามหนังสือ" desc="สร้างหนังสือขอความอนุเคราะห์ฝึกงานจากข้อมูลในคำร้องที่อนุมัติแล้ว และติดตามการจัดส่ง" />
-      <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy, margin: "4px 0 10px" }}>รอสร้างหนังสือ ({toIssue.length})</div>
-      {toIssue.length === 0 && <Card style={{ marginBottom: 16 }}><div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.muted, textAlign: "center", padding: 12 }}>ไม่มีคำร้องรอสร้างหนังสือ</div></Card>}
-      {toIssue.map((r) => (
-        <Card key={r.id} style={{ marginBottom: 12 }}>
-          <div style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: 16, marginBottom: 12, background: T.paper }}>
-            <div style={{ textAlign: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, color: T.navy, fontSize: 14, marginBottom: 10 }}>หนังสือขอความอนุเคราะห์รับนักศึกษาฝึกงาน</div>
-            <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text, lineHeight: 1.9 }}>
-              เรียน {r.contact}<br />
-              มหาวิทยาลัยขอความอนุเคราะห์ท่านรับ <b>{r.studentName}</b> เข้าฝึกปฏิบัติงานในตำแหน่ง <b>{r.position}</b> ณ {r.company}<br />
-              ระหว่างวันที่ {fmtDate(r.start)} ถึง {fmtDate(r.end)}<br />
-              ลงนามอนุมัติโดย {r.signedBy}
+    <div className="grid md:grid-cols-2 gap-5">
+      {STUDENTS.map((s) => (
+        <Card key={s.id} className="p-5">
+          <div className="flex gap-3 items-center mb-3">
+            <Avatar initials={s.initials} size={44} />
+            <div>
+              <div className="font-bold text-sm" style={{ color: C.text }}>{s.name}</div>
+              <div className="text-xs" style={{ color: C.textMuted }}>{s.code} • {s.major}</div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => onIssue(r.id)} style={btnGold({ display: "flex", alignItems: "center", gap: 6 })}><FileText size={14} /> สร้างหนังสือและส่งออก PDF</button>
+          <div className="text-xs space-y-1.5 mb-3" style={{ color: C.textBody }}>
+            <div className="flex items-center gap-2"><Building size={13} style={{ color: C.textMuted }} />{s.company} — {s.position}</div>
+            <div className="flex items-center gap-2"><Calendar size={13} style={{ color: C.textMuted }} />{s.period}</div>
           </div>
-        </Card>
-      ))}
-
-      <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy, margin: "20px 0 10px" }}>รอจัดส่งหนังสือ ({toSend.length})</div>
-      {toSend.length === 0 && <Card><div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.muted, textAlign: "center", padding: 12 }}>ไม่มีหนังสือรอจัดส่ง</div></Card>}
-      {toSend.map((r) => (
-        <Card key={r.id} style={{ marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy }}>{r.studentName} → {r.company}</div>
-            <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: T.muted, display: "flex", alignItems: "center", gap: 6 }}><Download size={12} /> หนังสือฉบับ PDF พร้อมแล้ว</div>
+          <div className="flex gap-2">
+            <StatusChip tone={s.logStatus === "ตรวจแล้ว" ? "success" : "warning"}>{s.logStatus}</StatusChip>
+            <StatusChip tone="info">{APP_STEPS[s.appStatus]}</StatusChip>
           </div>
-          <button onClick={() => onSend(r.id)} style={btnGhost({ display: "flex", alignItems: "center", gap: 6 })}><Send size={14} /> ทำเครื่องหมายว่าส่งแล้ว</button>
         </Card>
       ))}
     </div>
   );
 }
 
-function StaffLegal() {
-  const [q, setQ] = useState("");
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const check = () => {
-    if (!q.trim()) return;
-    setLoading(true);
-    setTimeout(() => {
-      const match = COMPANIES.find((c) => c.name.includes(q) || c.taxId === q);
-      setResult(match || false);
-      setLoading(false);
-    }, 900);
-  };
+function AdvisorAppointments() {
+  const requests = [
+    { student: "สมชาย ใจดี", topic: "รายงานความคืบหน้าโปรเจกต์", date: "15 พ.ย. 10:00", platform: "Google Meet" },
+    { student: "วิภาดา ก้าวหน้า", topic: "ปรึกษาปัญหาการทำงานร่วมกับทีม", date: "18 พ.ย. 13:00", platform: "Zoom" },
+  ];
   return (
-    <div>
-      <SectionHeader eyebrow="FR-08" title="ตรวจสอบข้อมูลนิติบุคคล" desc="เชื่อมต่อฐานข้อมูลกรมพัฒนาธุรกิจการค้าเพื่อยืนยันชื่อบริษัทและเลขทะเบียนนิติบุคคล" />
-      <Card>
-        <label style={labelStyle()}>ชื่อบริษัท หรือเลขทะเบียนนิติบุคคล</label>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="เช่น บริษัท เอสซีจี จำกัด (มหาชน)" style={inputStyle()} />
-          <button onClick={check} style={btnGold({ flexShrink: 0 })}>{loading ? "กำลังตรวจสอบ..." : "ตรวจสอบ"}</button>
-        </div>
-        {result && (
-          <div style={{ marginTop: 16, padding: 14, borderRadius: 8, background: T.greenPale, display: "flex", gap: 10 }}>
-            <ShieldCheck size={20} color={T.green} />
-            <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text }}>
-              <div style={{ fontWeight: 700, color: T.green, marginBottom: 3 }}>ยืนยันตัวตนนิติบุคคลสำเร็จ</div>
-              ชื่อ: {result.name}<br />เลขทะเบียนนิติบุคคล: {result.taxId}<br />สถานะ: ยังดำเนินกิจการ
+    <div className="space-y-4 max-w-3xl">
+      {requests.map((r) => (
+        <Card key={r.student} className="p-5 flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <div className="font-semibold text-sm" style={{ color: C.text }}>{r.student}</div>
+            <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>{r.topic}</div>
+            <div className="text-xs mt-1 flex items-center gap-3" style={{ color: C.textMuted }}>
+              <span className="flex items-center gap-1"><Clock size={12} />{r.date}</span>
+              <span className="flex items-center gap-1"><Video size={12} />{r.platform}</span>
             </div>
           </div>
-        )}
-        {result === false && (
-          <div style={{ marginTop: 16, padding: 14, borderRadius: 8, background: T.redPale, display: "flex", gap: 10, alignItems: "center" }}>
-            <AlertCircle size={20} color={T.red} />
-            <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.text }}>ไม่พบข้อมูลนิติบุคคลนี้ในฐาน DBD กรุณาตรวจสอบชื่อหรือเลขทะเบียนอีกครั้ง</div>
+          <div className="flex gap-2">
+            <Btn variant="outline" size="sm">ขอเลื่อนเวลา</Btn>
+            <Btn variant="primary" size="sm" icon={Check}>ยืนยันนัดหมาย</Btn>
           </div>
-        )}
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function AdvisorLogbook() {
+  const [active, setActive] = useState(STUDENTS[0]);
+  const [rating, setRating] = useState(3);
+  return (
+    <div className="grid lg:grid-cols-[280px_1fr] gap-6">
+      <div>
+        <Card className="p-4 mb-4">
+          <div className="text-xs font-semibold mb-3" style={{ color: C.textMuted }}>สถานะการส่ง Logbook</div>
+          <div className="flex justify-between text-xs mb-1"><span style={{ color: C.textBody }}>ส่งแล้ว (รอตรวจ)</span><span className="font-bold" style={{ color: C.navy }}>3/5</span></div>
+          <ProgressBar value={60} />
+        </Card>
+        <Card>
+          <div className="px-4 py-3 font-semibold text-sm border-b" style={{ borderColor: C.border, color: C.navy }}>รายชื่อนักศึกษา</div>
+          {STUDENTS.slice(0, 4).map((s) => (
+            <button key={s.id} onClick={() => setActive(s)} className="w-full flex items-center gap-3 px-4 py-3 border-b text-left" style={{ borderColor: C.border, background: active.id === s.id ? "#EBF3FC" : "transparent", borderLeft: active.id === s.id ? `3px solid ${C.primary}` : "3px solid transparent" }}>
+              <Avatar initials={s.initials} size={34} />
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-xs truncate" style={{ color: C.text }}>{s.name}</div>
+                <div className="text-[11px]" style={{ color: C.textMuted }}>{s.code}</div>
+              </div>
+              <StatusChip tone={s.logStatus === "ตรวจแล้ว" ? "success" : s.logStatus === "รอตรวจ" ? "warning" : "neutral"}>{s.logStatus}</StatusChip>
+            </button>
+          ))}
+        </Card>
+      </div>
+
+      <Card className="p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <Avatar initials={active.initials} size={44} />
+          <div className="flex-1">
+            <div className="font-bold" style={{ color: C.text }}>{active.name}</div>
+            <div className="text-xs" style={{ color: C.textMuted }}>{active.company} | ตำแหน่ง: {active.position}</div>
+          </div>
+          <StatusChip tone="info">สัปดาห์ที่ 8/16</StatusChip>
+        </div>
+        <div className="grid md:grid-cols-2 gap-5 mb-5">
+          <div>
+            <div className="text-xs font-semibold mb-2" style={{ color: C.textBody }}>รายละเอียดงานสัปดาห์ที่ 8</div>
+            <div className="text-sm rounded border p-3" style={{ borderColor: C.border, color: C.textBody, background: "#FAFBFC" }}>
+              พัฒนาระบบแสดงผลข้อมูล Dashboard ด้วย React.js และ Tailwind CSS แก้ไข Bug ในส่วนของการแสดงผลกราฟบนหน้าจอมือถือ ประชุมทีมวางแผนความคืบหน้าประจำสัปดาห์
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-semibold mb-2" style={{ color: C.textBody }}>ความคิดเห็นอาจารย์นิเทศ</div>
+            <textarea rows={5} placeholder="พิมพ์ข้อเสนอแนะหรือคำแนะนำสำหรับนักศึกษา..." className="w-full px-3 py-2.5 rounded border text-sm outline-none resize-none" style={{ borderColor: C.border }} />
+          </div>
+        </div>
+        <div className="flex items-center justify-between border-t pt-5" style={{ borderColor: C.border }}>
+          <div>
+            <div className="text-xs font-semibold mb-1.5" style={{ color: C.textBody }}>การประเมินผล</div>
+            <StarRow value={rating} onChange={setRating} />
+          </div>
+          <Btn variant="primary" icon={Check}>บันทึกและอนุมัติ Logbook</Btn>
+        </div>
       </Card>
     </div>
   );
 }
 
-function StaffUploads({ requests, onUpload }) {
+/* ============================== HR PAGES ============================== */
+
+function HRDashboard() {
+  const myApps = STUDENTS.filter((s) => s.company === "TechCorp Solutions");
   return (
-    <div>
-      <SectionHeader eyebrow="FR-06" title="หนังสือตอบรับ" desc="อัปโหลดและตรวจสอบหนังสือตอบรับที่ได้รับจากสถานประกอบการ" />
-      {requests.filter((r) => ["sent", "accepted"].includes(r.status)).map((r) => (
-        <Card key={r.id} style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div className="grid lg:grid-cols-3 gap-6">
+      <Card className="p-5 lg:col-span-1">
+        <div className="text-xs" style={{ color: C.textMuted }}>นักศึกษาฝึกงานปัจจุบัน</div>
+        <div className="text-3xl font-bold mt-1" style={{ color: C.navy }}>{myApps.length}</div>
+      </Card>
+      <Card className="p-5 lg:col-span-1">
+        <div className="text-xs" style={{ color: C.textMuted }}>ใบสมัครรอพิจารณา</div>
+        <div className="text-3xl font-bold mt-1" style={{ color: C.warning }}>3</div>
+      </Card>
+      <Card className="p-5 lg:col-span-1">
+        <div className="text-xs" style={{ color: C.textMuted }}>รอการประเมินผล</div>
+        <div className="text-3xl font-bold mt-1" style={{ color: C.primary }}>2</div>
+      </Card>
+      <Card className="lg:col-span-3">
+        <div className="px-5 py-4 border-b font-bold" style={{ borderColor: C.border, color: C.navy }}>นักศึกษาฝึกงานที่บริษัท</div>
+        <table className="w-full text-sm">
+          <thead><tr className="text-left" style={{ color: C.textMuted, borderBottom: `1px solid ${C.border}` }}>
+            <th className="px-5 py-3 text-xs font-semibold">นักศึกษา</th><th className="px-5 py-3 text-xs font-semibold">ตำแหน่ง</th><th className="px-5 py-3 text-xs font-semibold">ระยะเวลา</th><th className="px-5 py-3 text-xs font-semibold">สถานะ</th>
+          </tr></thead>
+          <tbody>
+            {myApps.map((s, i) => (
+              <tr key={s.id} style={{ borderBottom: i < myApps.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                <td className="px-5 py-3 flex items-center gap-2.5"><Avatar initials={s.initials} size={32} /><span className="font-semibold" style={{ color: C.text }}>{s.name}</span></td>
+                <td className="px-5 py-3" style={{ color: C.textBody }}>{s.position}</td>
+                <td className="px-5 py-3" style={{ color: C.textMuted }}>{s.period}</td>
+                <td className="px-5 py-3"><StatusChip tone="success">กำลังฝึกงาน</StatusChip></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+    </div>
+  );
+}
+
+function HRApplications() {
+  const rows = [
+    { name: "สมชาย ใจดี", major: "วิศวกรรมคอมพิวเตอร์ ปี 3", position: "Frontend Developer Intern", status: "รอพิจารณา", tone: "warning" },
+    { name: "พิมพ์รดา สุขสม", major: "การตลาด ปี 3", position: "Marketing Intern", status: "รอพิจารณา", tone: "warning" },
+    { name: "ธนกฤต มั่นคง", major: "วิทยาการคอมพิวเตอร์ ปี 4", position: "Backend Intern", status: "ตอบรับแล้ว", tone: "success" },
+  ];
+  return (
+    <div className="space-y-4 max-w-3xl">
+      {rows.map((r) => (
+        <Card key={r.name} className="p-5 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <Avatar initials={r.name[0]} size={40} />
             <div>
-              <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: T.navy }}>{r.studentName} — {r.company}</div>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: T.muted }}>{r.uploads.length} เอกสารในระบบ</div>
+              <div className="font-semibold text-sm" style={{ color: C.text }}>{r.name}</div>
+              <div className="text-xs" style={{ color: C.textMuted }}>{r.major} — สมัคร: {r.position}</div>
             </div>
-            <button onClick={() => onUpload(r.id)} style={btnGhost({ display: "flex", alignItems: "center", gap: 6 })}><Upload size={14} /> อัปโหลดหนังสือตอบรับ</button>
           </div>
-          {r.uploads.length > 0 && (
-            <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {r.uploads.map((u) => <span key={u} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: FONT_BODY, fontSize: 11.5, color: T.text, background: T.paper, padding: "4px 9px", borderRadius: 6 }}><Paperclip size={11} />{u}</span>)}
+          {r.status === "รอพิจารณา" ? (
+            <div className="flex gap-2">
+              <Btn variant="outline" size="sm" icon={X}>ปฏิเสธ</Btn>
+              <Btn variant="primary" size="sm" icon={Check}>ตอบรับ</Btn>
             </div>
-          )}
+          ) : <StatusChip tone={r.tone}>{r.status}</StatusChip>}
         </Card>
       ))}
     </div>
   );
 }
 
-/* ---------- HR VIEWS ---------- */
-
-function HRQueue({ requests, onAccept }) {
-  const incoming = requests.filter((r) => r.status === "sent" || r.status === "accepted");
+function HREvaluation() {
+  const [active, setActive] = useState(STUDENTS[0]);
+  const [ratings, setRatings] = useState({});
   return (
-    <div>
-      <SectionHeader eyebrow="FR-03 / FR-06" title="คำร้องที่ได้รับ" desc="หนังสือขอความอนุเคราะห์ฝึกงานที่มหาวิทยาลัยส่งมายังบริษัทของท่าน" />
-      {incoming.map((r) => (
-        <Card key={r.id} style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+    <div className="grid lg:grid-cols-[280px_1fr] gap-6">
+      <Card>
+        <div className="px-4 py-3 font-semibold text-sm border-b" style={{ borderColor: C.border, color: C.navy }}>รายชื่อนักศึกษา ({STUDENTS.length})</div>
+        {STUDENTS.slice(0, 3).map((s) => (
+          <button key={s.id} onClick={() => setActive(s)} className="w-full flex items-center gap-3 px-4 py-3 border-b text-left" style={{ borderColor: C.border, background: active.id === s.id ? "#EBF3FC" : "transparent", borderLeft: active.id === s.id ? `3px solid ${C.primary}` : "3px solid transparent" }}>
+            <Avatar initials={s.initials} size={34} />
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-xs truncate" style={{ color: C.text }}>{s.name}</div>
+              <div className="text-[11px] truncate" style={{ color: C.textMuted }}>{s.major}</div>
+            </div>
+            <StatusChip tone="warning">PENDING</StatusChip>
+          </button>
+        ))}
+      </Card>
+
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <Avatar initials={active.initials} size={48} />
             <div>
-              <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: T.navy }}>{r.studentName}</div>
-              <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.muted }}>{r.position} · {fmtDate(r.start)} – {fmtDate(r.end)}</div>
+              <div className="font-bold" style={{ color: C.text }}>{active.name}</div>
+              <div className="text-xs" style={{ color: C.textMuted }}>รหัสนักศึกษา: {active.code} • แผนก: {active.major}</div>
             </div>
-            <Badge tone={statusTone(r.status)}>{STAGES.find((s) => s.key === r.status)?.label}</Badge>
           </div>
-          {r.status === "sent" && (
-            <button onClick={() => onAccept(r.id)} style={btnGold({ marginTop: 12, display: "flex", alignItems: "center", gap: 6 })}><CheckCircle2 size={14} /> ตอบรับนักศึกษา</button>
-          )}
-        </Card>
-      ))}
-      {incoming.length === 0 && <Card><div style={{ fontFamily: FONT_BODY, fontSize: 13, color: T.muted, textAlign: "center", padding: 20 }}>ยังไม่มีคำร้องเข้ามา</div></Card>}
-    </div>
-  );
-}
+          <div className="text-right text-xs" style={{ color: C.textMuted }}>ระยะเวลาฝึกงาน<div className="font-semibold" style={{ color: C.text }}>{active.period}</div></div>
+        </div>
 
-function HREvaluate({ requests, evaluations, onSubmit }) {
-  const target = requests.filter((r) => r.status === "accepted");
-  const [openId, setOpenId] = useState(null);
-  const [scores, setScores] = useState({ skill: 4, resp: 4, comm: 4, punct: 4, note: "" });
-  return (
-    <div>
-      <SectionHeader eyebrow="FR-11" title="ประเมินนักศึกษาฝึกงาน" desc="เปิดแบบประเมินและให้คะแนนการปฏิบัติงานของนักศึกษา" />
-      {target.map((r) => {
-        const done = evaluations[r.id];
-        return (
-          <Card key={r.id} style={{ marginBottom: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: T.navy }}>{r.studentName}</div>
-                <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: T.muted }}>{r.position}</div>
-              </div>
-              {done ? <Badge tone="green">ส่งผลประเมินแล้ว</Badge> : (
-                <button onClick={() => setOpenId(openId === r.id ? null : r.id)} style={btnGold()}>เปิดแบบประเมิน</button>
-              )}
-            </div>
-            {!done && openId === r.id && (
-              <div style={{ marginTop: 14, borderTop: `1px solid ${T.border}`, paddingTop: 14 }}>
-                {[["skill", "ทักษะการทำงาน"], ["resp", "ความรับผิดชอบ"], ["comm", "การสื่อสาร"], ["punct", "การตรงต่อเวลา"]].map(([k, l]) => (
-                  <div key={k} style={{ marginBottom: 12 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <label style={labelStyle()}>{l}</label>
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.gold, fontWeight: 700 }}>{scores[k]} / 5</span>
-                    </div>
-                    <input type="range" min={1} max={5} value={scores[k]} onChange={(e) => setScores({ ...scores, [k]: Number(e.target.value) })} style={{ width: "100%", accentColor: T.gold }} />
+        <div className="space-y-6">
+          {EVAL_GROUPS.map((g) => (
+            <div key={g.title}>
+              <div className="font-bold text-sm mb-1 pl-3 border-l-4" style={{ color: C.text, borderColor: C.primary }}>{g.title}</div>
+              {g.desc && <p className="text-xs mb-3 pl-3.5" style={{ color: C.textMuted }}>{g.desc}</p>}
+              <div className="space-y-3 pl-3.5">
+                {g.items.map((it) => (
+                  <div key={it} className="flex justify-between items-center">
+                    <span className="text-sm" style={{ color: C.textBody }}>{it}</span>
+                    <StarRow value={ratings[it] || 0} onChange={(n) => setRatings({ ...ratings, [it]: n })} size={17} />
                   </div>
                 ))}
-                <label style={labelStyle()}>ความคิดเห็นเพิ่มเติม</label>
-                <textarea value={scores.note} onChange={(e) => setScores({ ...scores, note: e.target.value })} rows={2} placeholder="ข้อเสนอแนะสำหรับนักศึกษา" style={{ ...inputStyle(), resize: "vertical" }} />
-                <button onClick={() => { onSubmit(r.id, scores); setOpenId(null); }} style={btnPrimary({ marginTop: 12 })}>ส่งผลประเมิน</button>
               </div>
-            )}
-          </Card>
-        );
-      })}
-      {target.length === 0 && <Card><div style={{ fontFamily: FONT_BODY, fontSize: 13, color: T.muted, textAlign: "center", padding: 20 }}>ยังไม่มีนักศึกษาที่พร้อมประเมิน</div></Card>}
+            </div>
+          ))}
+
+          <div>
+            <div className="font-bold text-sm mb-3 pl-3 border-l-4" style={{ color: C.text, borderColor: C.primary }}>3. ข้อเสนอแนะเพิ่มเติม (Comments & Suggestions)</div>
+            <div className="pl-3.5 space-y-3">
+              <div>
+                <label className="text-xs font-semibold" style={{ color: C.textBody }}>จุดเด่นที่ควรส่งเสริม (Strengths)</label>
+                <textarea rows={2} placeholder="ระบุจุดเด่นหรือทักษะที่นักศึกษาทำได้ดี..." className="w-full mt-1.5 px-3 py-2.5 rounded border text-sm outline-none resize-none" style={{ borderColor: C.border }} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold" style={{ color: C.textBody }}>ข้อควรปรับปรุง (Areas for Improvement)</label>
+                <textarea rows={2} placeholder="ระบุสิ่งที่นักศึกษาควรพัฒนาเพิ่มเติม..." className="w-full mt-1.5 px-3 py-2.5 rounded border text-sm outline-none resize-none" style={{ borderColor: C.border }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-6 pt-5 border-t" style={{ borderColor: C.border }}>
+          <Btn variant="outline">บันทึกร่าง</Btn>
+          <Btn variant="primary" icon={ArrowRight}>ยืนยันการส่งผลประเมิน</Btn>
+        </div>
+      </Card>
     </div>
   );
 }
 
-/* ---------- APP ---------- */
+/* ============================== ADMIN PAGES ============================== */
 
-export default function InternshipSystem() {
-  const [role, setRole] = useState("student");
-  const [viewByRole, setViewByRole] = useState({ student: "dashboard", advisor: "queue", staff: "overview", hr: "queue" });
-  const [notifOpen, setNotifOpen] = useState(false);
+function AdminDashboard() {
+  return (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-5">
+        <Card className="p-6 flex justify-between items-start">
+          <div>
+            <div className="text-sm mb-1" style={{ color: C.textMuted }}>นักศึกษาฝึกงานทั้งหมด</div>
+            <div className="text-3xl font-bold" style={{ color: C.navy }}>1,248</div>
+            <div className="text-xs mt-1 flex items-center gap-1" style={{ color: C.success }}><TrendingUp size={13} /> เพิ่มขึ้น 12% จากปีที่แล้ว</div>
+          </div>
+          <div style={{ background: "#EBF3FC" }} className="w-11 h-11 rounded flex items-center justify-center"><Users size={20} style={{ color: C.primary }} /></div>
+        </Card>
+        <Card className="p-6">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <div className="text-sm mb-1" style={{ color: C.textMuted }}>อัตราการส่งบันทึกการฝึกงาน</div>
+              <div className="text-3xl font-bold" style={{ color: C.navy }}>85%</div>
+            </div>
+            <div style={{ background: "#EBF3FC" }} className="w-11 h-11 rounded flex items-center justify-center"><BookOpen size={20} style={{ color: C.primary }} /></div>
+          </div>
+          <ProgressBar value={85} />
+        </Card>
+      </div>
 
-  const [requests, setRequests] = useState(INIT_REQUESTS);
-  const [logbook, setLogbook] = useState(INIT_LOGBOOK);
-  const [notifs, setNotifs] = useState(INIT_NOTIFS);
-  const [meetings, setMeetings] = useState(INIT_MEETINGS);
-  const [chat, setChat] = useState(INIT_CHAT);
-  const [companies, setCompanies] = useState(COMPANIES);
-  const [evaluations, setEvaluations] = useState({});
+      <Card className="p-6">
+        <div className="flex justify-between mb-4">
+          <h3 className="font-bold" style={{ color: C.navy }}>สถานประกอบการชั้นนำ</h3>
+          <span className="text-sm font-semibold" style={{ color: C.primary }}>ดูทั้งหมด</span>
+        </div>
+        <div className="space-y-3">
+          {[["Acme Corp", "AC", 42], ["Global Industries", "GI", 38], ["Tech Solutions", "TS", 31]].map(([n, ini, c]) => (
+            <div key={n} className="flex items-center justify-between">
+              <div className="flex items-center gap-3"><Avatar initials={ini} size={34} tone={C.primary} /><span className="text-sm font-medium" style={{ color: C.text }}>{n}</span></div>
+              <span className="text-sm" style={{ color: C.textMuted }}>{c} นักศึกษา</span>
+            </div>
+          ))}
+        </div>
+      </Card>
 
-  const view = viewByRole[role];
-  const setView = (v) => setViewByRole((s) => ({ ...s, [role]: v }));
+      <Card className="p-6">
+        <div className="flex justify-between mb-4">
+          <h3 className="font-bold" style={{ color: C.navy }}>นำเข้าข้อมูลนักศึกษา</h3>
+          <span className="text-xs font-semibold flex items-center gap-1" style={{ color: C.primary }}><Download size={13} />ดาวน์โหลดแบบฟอร์มตัวอย่าง</span>
+        </div>
+        <div className="rounded border-2 border-dashed py-8 flex flex-col items-center gap-2" style={{ borderColor: C.border }}>
+          <Upload size={26} style={{ color: C.textMuted }} />
+          <span className="text-sm" style={{ color: C.textMuted }}>ลากและวางไฟล์ Excel หรือคลิกเพื่อเลือกไฟล์ (รองรับ .xlsx, .csv)</span>
+        </div>
+        <div className="grid grid-cols-3 gap-3 mt-4">
+          <div className="rounded p-3 text-center" style={{ background: "#F1F5F9" }}><div className="text-lg font-bold" style={{ color: C.text }}>150</div><div className="text-[11px]" style={{ color: C.textMuted }}>รายการ</div></div>
+          <div className="rounded p-3 text-center" style={{ background: C.successBg }}><div className="text-lg font-bold" style={{ color: C.success }}>148</div><div className="text-[11px]" style={{ color: C.textMuted }}>พร้อมนำเข้า</div></div>
+          <div className="rounded p-3 text-center" style={{ background: C.errorBg }}><div className="text-lg font-bold" style={{ color: C.error }}>2</div><div className="text-[11px]" style={{ color: C.textMuted }}>ข้อผิดพลาด</div></div>
+        </div>
+      </Card>
+    </div>
+  );
+}
 
-  const notify = (text) => setNotifs((n) => [{ id: Date.now(), text, time: "เมื่อสักครู่", read: false }, ...n]);
+function AdminApplications() {
+  const rows = STUDENTS.map((s) => ({ name: s.name, code: s.code, type: `คำร้องขอฝึกงาน — ${s.company}`, status: APP_STEPS[s.appStatus], tone: s.appStatus >= 4 ? "success" : "warning", date: "22 ต.ค. 2566" }));
+  return <DocsTable rows={rows} actionLabel="ตรวจสอบ" />;
+}
 
-  const me = STUDENTS.find((s) => s.id === "6432010099");
-  const myRequest = requests.find((r) => r.studentId === "6432010099");
-  const myLogbook = logbook.filter((l) => l.studentId === "6432010099");
-  const aiTeaser = [{ name: "บริษัท เอสซีจี จำกัด (มหาชน)", match: 91 }, { name: "บริษัท ปตท. จำกัด (มหาชน)", match: 84 }];
+function AdminCompanies() {
+  return (
+    <div className="grid md:grid-cols-2 gap-5">
+      {COMPANIES.map((c) => (
+        <Card key={c.id} className="p-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div style={{ background: "#EBF3FC" }} className="w-11 h-11 rounded flex items-center justify-center"><Building2 size={20} style={{ color: C.primary }} /></div>
+            <div>
+              <div className="font-semibold text-sm flex items-center gap-1" style={{ color: C.text }}>{c.name} {c.verified && <ShieldCheck size={13} style={{ color: C.primary }} />}</div>
+              <div className="text-xs" style={{ color: C.textMuted }}>{c.industry} • {c.location}</div>
+            </div>
+          </div>
+          <StatusChip tone="warning"><Star size={11} className="inline -mt-0.5 mr-0.5" fill="#8A6D1A" />{c.rating}</StatusChip>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
-  const approveRequest = (id, signer) => {
-    setRequests((rs) => rs.map((r) => r.id === id ? { ...r, status: "approved", signedBy: signer } : r));
-    notify("คำร้องฝึกงานได้รับการอนุมัติจากอาจารย์นิเทศแล้ว");
-  };
-  const rejectRequest = () => notify("คำร้องถูกส่งกลับให้นักศึกษาแก้ไขข้อมูล");
-  const issueDocument = (id) => {
-    setRequests((rs) => rs.map((r) => r.id === id ? { ...r, status: "document_issued" } : r));
-    notify("เจ้าหน้าที่สร้างหนังสือขอความอนุเคราะห์เรียบร้อยแล้ว");
-  };
-  const sendDocument = (id) => {
-    setRequests((rs) => rs.map((r) => r.id === id ? { ...r, status: "sent" } : r));
-    notify("หนังสือขอความอนุเคราะห์ถูกจัดส่งไปยังสถานประกอบการแล้ว");
-  };
-  const hrAccept = (id) => {
-    setRequests((rs) => rs.map((r) => r.id === id ? { ...r, status: "accepted" } : r));
-    notify("สถานประกอบการตอบรับนักศึกษาเข้าฝึกงานแล้ว");
-  };
-  const uploadResponse = (id) => {
-    setRequests((rs) => rs.map((r) => r.id === id ? { ...r, uploads: [...r.uploads, `หนังสือตอบรับ_${r.id}_${r.uploads.length + 1}.pdf`] } : r));
-    notify("อัปโหลดหนังสือตอบรับเรียบร้อยแล้ว");
-  };
-  const submitNewRequest = (data) => {
-    const isSubmit = data.status === "submitted";
-    const status = isSubmit ? "pending_advisor" : "draft";
-    setRequests((rs) => [...rs, { id: Date.now(), studentId: me.id, studentName: me.name, ...data, status, uploads: [] }]);
-    notify(isSubmit ? "ยื่นคำร้องฝึกงานสำเร็จ กำลังรอการอนุมัติจากอาจารย์นิเทศ" : "บันทึกร่างคำร้องฝึกงานเรียบร้อยแล้ว");
-  };
-  const addLogbook = (entry) => setLogbook((l) => [{ id: Date.now(), studentId: me.id, date: new Date().toISOString().slice(0, 10), comment: null, ...entry }, ...l]);
-  const addLogbookComment = (id, comment) => { setLogbook((l) => l.map((e) => e.id === id ? { ...e, comment } : e)); notify("อาจารย์นิเทศแสดงความคิดเห็นใน Logbook ของคุณ"); };
-  const addReview = (name, review) => setCompanies((cs) => cs.map((c) => c.name === name ? { ...c, reviews: [review, ...c.reviews] } : c));
-  const addMeeting = (m) => setMeetings((ms) => [...ms, { id: Date.now(), ...m }]);
-  const sendChat = (text) => setChat((c) => [...c, { from: role === "advisor" ? "advisor" : "student", text, time: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) }]);
-  const submitEvaluation = (id, data) => { setEvaluations((e) => ({ ...e, [id]: data })); notify("ผลการประเมินถูกส่งไปยังมหาวิทยาลัยแล้ว"); };
-  const markRead = () => setNotifs((n) => n.map((x) => ({ ...x, read: true })));
+function AdminDocuments() {
+  return (
+    <div>
+      <div className="flex justify-between mb-4">
+        <div className="flex gap-2">
+          <Btn variant="outline" size="sm">การดำเนินการที่รอดำเนินการ (12)</Btn>
+        </div>
+        <Btn variant="primary" icon={FileCheck2} size="sm">สร้างจดหมายขอความอนุเคราะห์แบบกลุ่ม</Btn>
+      </div>
+      <DocsTable rows={DOCS} actionLabel="สร้าง PDF" />
+    </div>
+  );
+}
 
-  let content;
-  if (role === "student") {
-    if (view === "dashboard") content = <StudentDashboard me={me} myRequest={myRequest} notifs={notifs} aiTeaser={aiTeaser} />;
-    else if (view === "request") content = <StudentRequestForm onSubmit={submitNewRequest} />;
-    else if (view === "status") content = <StudentStatus myRequest={myRequest} onUpload={() => uploadResponse(myRequest.id)} />;
-    else if (view === "logbook") content = <StudentLogbook entries={myLogbook} onAdd={addLogbook} />;
-    else if (view === "match") content = <StudentMatch />;
-    else if (view === "reviews") content = <StudentReviews companies={companies} onAddReview={addReview} />;
-    else if (view === "chat") content = <ChatView messages={chat} onSend={sendChat} selfKey="student" otherLabel="อาจารย์นิเทศ" selfLabel="คุณ" />;
-  } else if (role === "advisor") {
-    if (view === "queue") content = <AdvisorQueue requests={requests} onApprove={approveRequest} onReject={rejectRequest} />;
-    else if (view === "logbook") content = <AdvisorLogbook students={STUDENTS} entries={logbook} onComment={addLogbookComment} />;
-    else if (view === "meetings") content = <AdvisorMeetings meetings={meetings} onAdd={addMeeting} students={STUDENTS} />;
-    else if (view === "chat") content = <ChatView messages={chat} onSend={sendChat} selfKey="advisor" otherLabel="นักศึกษา" selfLabel="คุณ" />;
-  } else if (role === "staff") {
-    if (view === "overview") content = <StaffOverview />;
-    else if (view === "students") content = <StaffStudents students={STUDENTS} requests={requests} />;
-    else if (view === "documents") content = <StaffDocuments requests={requests} onIssue={issueDocument} onSend={sendDocument} />;
-    else if (view === "legal") content = <StaffLegal />;
-    else if (view === "uploads") content = <StaffUploads requests={requests} onUpload={uploadResponse} />;
-  } else if (role === "hr") {
-    if (view === "queue") content = <HRQueue requests={requests} onAccept={hrAccept} />;
-    else if (view === "evaluate") content = <HREvaluate requests={requests} evaluations={evaluations} onSubmit={submitEvaluation} />;
-  }
+function AdminAnalytics() {
+  const majors = [["วิศวกรรมคอมพิวเตอร์", 320], ["วิทยาการคอมพิวเตอร์", 280], ["การตลาด", 190], ["บัญชี", 150], ["เทคโนโลยีสารสนเทศ", 130]];
+  const max = Math.max(...majors.map((m) => m[1]));
+  return (
+    <div className="grid lg:grid-cols-2 gap-6">
+      <Card className="p-6">
+        <h3 className="font-bold mb-4" style={{ color: C.navy }}>จำนวนนักศึกษาฝึกงานตามสาขาวิชา</h3>
+        <div className="space-y-3">
+          {majors.map(([m, v]) => (
+            <div key={m}>
+              <div className="flex justify-between text-xs mb-1"><span style={{ color: C.textBody }}>{m}</span><span className="font-semibold" style={{ color: C.text }}>{v}</span></div>
+              <ProgressBar value={(v / max) * 100} tone={C.primary} />
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Card className="p-6">
+        <h3 className="font-bold mb-4" style={{ color: C.navy }}>สรุปสถานะคำร้องทั้งหมด</h3>
+        <div className="space-y-3">
+          {[["เริ่มฝึกงานแล้ว", 812, C.success], ["อยู่ระหว่างดำเนินการ", 340, C.warning], ["รอเอกสาร", 96, C.primary]].map(([l, v, col]) => (
+            <div key={l} className="flex items-center justify-between border rounded px-4 py-3" style={{ borderColor: C.border }}>
+              <span className="text-sm" style={{ color: C.textBody }}>{l}</span>
+              <span className="font-bold text-lg" style={{ color: col }}>{v}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+/* ============================== PAGE REGISTRY ============================== */
+
+const PAGES = {
+  student: { dash: StudentDashboard, apply: StudentApplication, companies: StudentCompanies, docs: StudentDocuments, appt: StudentAppointments, log: StudentLogbook },
+  advisor: { dash: AdvisorDashboard, students: AdvisorStudents, appt: AdvisorAppointments, log: AdvisorLogbook },
+  hr: { dash: HRDashboard, apps: HRApplications, eval: HREvaluation, docs: () => <DocsTable rows={DOCS} /> },
+  admin: { dash: AdminDashboard, apps: AdminApplications, companies: AdminCompanies, docs: AdminDocuments, analytics: AdminAnalytics },
+};
+
+/* ============================== ROOT APP ============================== */
+
+export default function App() {
+  const [role, setRole] = useState(null);
+  const [page, setPage] = useState("dash");
+
+  if (!role) return <LoginScreen onLogin={(r) => { setRole(r); setPage("dash"); }} />;
+
+  const Page = PAGES[role][page] || PAGES[role].dash;
+  const navItem = NAV[role].find((n) => n.key === page);
 
   return (
-    <div style={{ fontFamily: FONT_BODY, background: T.paper, minHeight: "100vh" }} onClick={(e) => { if (notifOpen && !e.target.closest("[aria-label='การแจ้งเตือน']")) setNotifOpen(false); }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');`}</style>
-      <Header role={role} setRole={setRole} notifs={notifs} onOpenNotifs={() => setNotifOpen((o) => !o)} notifOpen={notifOpen} onMarkRead={markRead} />
-      <div style={{ display: "flex" }}>
-        <Sidebar role={role} view={view} setView={setView} />
-        <div style={{ flex: 1, padding: "26px 32px", maxWidth: 980 }}>{content}</div>
+    <div style={{ background: C.bg, fontFamily: "Inter, sans-serif" }} className="h-screen w-full flex overflow-hidden">
+      <Sidebar role={role} page={page} setPage={setPage} onLogout={() => setRole(null)} />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <TopBar role={role} title={navItem?.label || ""} />
+        <div className="flex-1 overflow-auto p-8">
+          <Page />
+        </div>
       </div>
     </div>
   );
