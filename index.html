@@ -35,6 +35,44 @@
             </div>
 
             <form id="loginForm" onsubmit="handleEpassportLogin(event)" class="space-y-4">
+                
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-3 rounded-2xl border border-amber-200/80 mb-2">
+                    <p class="text-[11px] font-semibold text-amber-800 flex items-center gap-1.5 mb-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+                        <span>เลือกตัวอย่างเข้าใช้งานทันที (Quick Demo Accounts)</span>
+                    </p>
+                    <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+                        <button type="button" onclick="quickDemoLogin('student')" class="bg-white hover:bg-amber-100/70 text-slate-700 py-1.5 px-2.5 rounded-xl border border-amber-200 transition text-left flex items-center gap-2 font-medium shadow-xs">
+                            <span class="text-base">🎓</span>
+                            <div>
+                                <div class="font-semibold text-slate-800">นักศึกษา</div>
+                                <div class="text-[9px] text-slate-400">ยื่นคำร้อง/ส่ง Logbook</div>
+                            </div>
+                        </button>
+                        <button type="button" onclick="quickDemoLogin('officer')" class="bg-white hover:bg-amber-100/70 text-slate-700 py-1.5 px-2.5 rounded-xl border border-amber-200 transition text-left flex items-center gap-2 font-medium shadow-xs">
+                            <span class="text-base">💼</span>
+                            <div>
+                                <div class="font-semibold text-slate-800">เจ้าหน้าที่</div>
+                                <div class="text-[9px] text-slate-400">นำเข้า Excel / จัดการตาราง</div>
+                            </div>
+                        </button>
+                        <button type="button" onclick="quickDemoLogin('head')" class="bg-white hover:bg-amber-100/70 text-slate-700 py-1.5 px-2.5 rounded-xl border border-amber-200 transition text-left flex items-center gap-2 font-medium shadow-xs">
+                            <span class="text-base">👔</span>
+                            <div>
+                                <div class="font-semibold text-slate-800">หัวหน้าสาขา</div>
+                                <div class="text-[9px] text-slate-400">อนุมัติระดับสาขา</div>
+                            </div>
+                        </button>
+                        <button type="button" onclick="quickDemoLogin('director')" class="bg-white hover:bg-amber-100/70 text-slate-700 py-1.5 px-2.5 rounded-xl border border-amber-200 transition text-left flex items-center gap-2 font-medium shadow-xs">
+                            <span class="text-base">🏛️</span>
+                            <div>
+                                <div class="font-semibold text-slate-800">ผู้อำนวยการ</div>
+                                <div class="text-[9px] text-slate-400">ลงนาม E-Signature</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1.5">เลือกประเภทผู้ใช้งาน</label>
                     <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 border border-slate-200 rounded-xl text-xs font-medium">
@@ -216,19 +254,25 @@
                 </div>
 
                 <div id="studentContent-documents" class="student-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
-                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-file-arrow-up text-sky-600"></i> อัปโหลดเอกสารประกอบการยื่นคำร้อง (PDF)
+                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3 flex items-center justify-between">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-file-arrow-up text-sky-600"></i> เอกสารประกอบการยื่นคำร้อง (PDF)</span>
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                        <div class="p-4 border border-dashed border-slate-300 rounded-2xl text-center bg-slate-50">
+                        <div class="p-4 border border-dashed border-slate-300 rounded-2xl text-center bg-slate-50 hover:bg-slate-100/50 transition">
                             <i class="fa-solid fa-file-pdf text-3xl text-rose-500 mb-2"></i>
                             <p class="font-medium text-slate-700 text-xs mb-1">เอกสารประวัติส่วนตัว (Resume / CV)</p>
-                            <input type="file" accept=".pdf" class="text-xs text-slate-500 mt-2">
+                            <input type="file" accept=".pdf" class="text-xs text-slate-500 mt-2 block w-full text-center">
+                            <button type="button" onclick="previewSamplePDF('Resume / CV', activeUser.name)" class="mt-3 text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-xl font-medium border border-rose-200 transition inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-eye"></i> ดูตัวอย่างเอกสาร Resume
+                            </button>
                         </div>
-                        <div class="p-4 border border-dashed border-slate-300 rounded-2xl text-center bg-slate-50">
+                        <div class="p-4 border border-dashed border-slate-300 rounded-2xl text-center bg-slate-50 hover:bg-slate-100/50 transition">
                             <i class="fa-solid fa-file-invoice text-3xl text-amber-500 mb-2"></i>
                             <p class="font-medium text-slate-700 text-xs mb-1">ใบแสดงผลการเรียน (Transcript)</p>
-                            <input type="file" accept=".pdf" class="text-xs text-slate-500 mt-2">
+                            <input type="file" accept=".pdf" class="text-xs text-slate-500 mt-2 block w-full text-center">
+                            <button type="button" onclick="previewSamplePDF('Transcript (ใบแสดงผลการเรียน)', activeUser.name)" class="mt-3 text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-xl font-medium border border-amber-200 transition inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-eye"></i> ดูตัวอย่างเอกสาร Transcript
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -275,6 +319,11 @@
                         </div>
                         
                         <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="exportToCSV()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs px-3.5 py-2 rounded-xl font-medium transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-file-export"></i>
+                                <span>ส่งออก CSV</span>
+                            </button>
+
                             <button onclick="openAddStudentModal()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs px-3.5 py-2 rounded-xl font-medium transition flex items-center gap-1.5 shadow-sm">
                                 <i class="fa-solid fa-user-plus"></i>
                                 <span>เพิ่มนักศึกษาใหม่</span>
@@ -366,7 +415,14 @@
 
             <div id="directorPortalView" class="hidden space-y-6">
                 <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
-                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3">ลงนามหนังสือส่งตัว (E-Signature)</h3>
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <h3 class="text-base font-semibold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-file-signature text-purple-600"></i> ลงนามหนังสือส่งตัวด้วย E-Signature
+                        </h3>
+                        <span class="text-xs bg-purple-50 text-purple-700 px-3 py-1 rounded-xl font-medium border border-purple-200">
+                            ผู้อำนวยการวิทยาลัยรัตภูมิ
+                        </span>
+                    </div>
                     <div id="directorEsignCards" class="space-y-3"></div>
                 </div>
             </div>
@@ -374,310 +430,167 @@
         </main>
     </div>
 
-    <!-- Edit / Add Student Modal -->
-    <div id="studentModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-4 relative border border-slate-100">
+    <!-- PDF Preview Modal -->
+    <div id="pdfModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 space-y-4 border border-slate-100">
             <div class="flex items-center justify-between border-b pb-3">
-                <h3 class="font-bold text-slate-800 text-base" id="modalTitle">แก้ไขข้อมูลนักศึกษา</h3>
-                <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100">
+                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf text-rose-500"></i> <span id="pdfModalTitle">ตัวอย่างเอกสาร</span>
+                </h3>
+                <button onclick="closePdfModal()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 min-h-[300px] flex flex-col justify-between">
+                <div class="space-y-3 text-xs">
+                    <div class="flex justify-between items-start border-b border-slate-200 pb-3">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">มหาวิทยาลัยเทคโนโลยีราชมงคลศรีวิชัย วิทยาลัยรัตภูมิ</p>
+                            <p class="text-slate-500">เอกสารประกอบการยื่นคำร้องฝึกงาน / สหกิจศึกษา ปีการศึกษา 2568</p>
+                        </div>
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full">VERIFIED PDF</span>
+                    </div>
+                    <div class="pt-2 grid grid-cols-2 gap-2 text-slate-600">
+                        <p><strong>ชื่อ-นามสกุล:</strong> <span id="pdfStudentName">-</span></p>
+                        <p><strong>ประเภทเอกสาร:</strong> <span id="pdfDocType">-</span></p>
+                        <p><strong>วันที่อัปโหลด:</strong> 1 มีนาคม 2568</p>
+                        <p><strong>สถานะความสมบูรณ์:</strong> <span class="text-emerald-600 font-semibold">ถูกต้อง 100%</span></p>
+                    </div>
+                    <div class="mt-4 p-4 bg-white border border-slate-200 rounded-xl space-y-2">
+                        <div class="h-3 bg-slate-200 rounded w-3/4 animate-pulse"></div>
+                        <div class="h-3 bg-slate-200 rounded w-1/2 animate-pulse"></div>
+                        <div class="h-3 bg-slate-200 rounded w-5/6 animate-pulse"></div>
+                        <p class="text-[11px] text-slate-400 italic pt-2">* ระบบตัวอย่างจำลองการเปิดไฟล์ PDF ใน iframe preview</p>
+                    </div>
+                </div>
+                <div class="pt-4 flex justify-end">
+                    <button onclick="closePdfModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium rounded-xl">ปิดหน้าต่าง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- E-Signature Modal -->
+    <div id="signatureModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-pen-nib text-purple-600"></i> ลงนามอิเล็กทรอนิกส์ (E-Signature)
+                </h3>
+                <button onclick="closeSignatureModal()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <form onsubmit="handleSaveStudentModal(event)" class="space-y-3 text-xs">
-                <input type="hidden" id="modalIsEditMode" value="true">
-                <input type="hidden" id="modalOriginalId" value="">
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-medium text-slate-600 mb-1">รหัสนักศึกษา *</label>
-                        <input type="text" id="modalId" required placeholder="268113100xxx" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-600 mb-1">ชื่อ - นามสกุล *</label>
-                        <input type="text" id="modalName" required placeholder="นาย/นางสาว..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500">
+            <div class="space-y-3 text-xs">
+                <p class="text-slate-600" id="signatureTargetText">กำลังลงนามหนังสือส่งตัวให้...</p>
+                <div class="border-2 border-dashed border-purple-300 rounded-2xl bg-purple-50/40 p-4 text-center min-h-[140px] flex flex-col items-center justify-center relative">
+                    <i class="fa-solid fa-signature text-4xl text-purple-300 mb-1"></i>
+                    <p class="text-slate-500 font-medium text-[11px]">ตราประทับและลายมือชื่อดิจิทัล</p>
+                    <div class="mt-2 text-purple-700 font-bold border-b-2 border-purple-600 px-4 py-1 inline-block font-serif text-sm">
+                        ผศ.ดร.วิชัย บัญชาการ
                     </div>
                 </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-medium text-slate-600 mb-1">สาขาวิชา</label>
-                        <select id="modalMajor" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500">
-                            <option value="สาขาวิชาการบัญชี">สาขาวิชาการบัญชี</option>
-                            <option value="สาขาวิชาการตลาดดิจิทัล">สาขาวิชาการตลาดดิจิทัล</option>
-                            <option value="สาขาวิชาเทคโนโลยีดิจิทัล">สาขาวิชาเทคโนโลยีดิจิทัล</option>
-                            <option value="สาขาวิชาช่างยนต์">สาขาวิชาช่างยนต์</option>
-                            <option value="สาขาวิชาช่างไฟฟ้า">สาขาวิชาช่างไฟฟ้า</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-600 mb-1">เบอร์โทรศัพท์</label>
-                        <input type="text" id="modalPhone" placeholder="08x-xxx-xxxx" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-medium text-slate-600 mb-1">อีเมลนักศึกษา</label>
-                    <input type="email" id="modalEmail" placeholder="student@rmutsvmail.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-medium text-slate-600 mb-1">ชื่อสถานประกอบการ</label>
-                        <input type="text" id="modalCompany" placeholder="ระบุบริษัท..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-600 mb-1">แผนก/ฝ่าย</label>
-                        <input type="text" id="modalDept" placeholder="เช่น ฝ่ายบัญชี..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-medium text-slate-600 mb-1">ที่อยู่สถานประกอบการ</label>
-                    <textarea id="modalAddress" rows="2" placeholder="ที่อยู่บริษัท..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500"></textarea>
-                </div>
-
-                <div>
-                    <label class="block font-medium text-slate-600 mb-1">สถานะคำร้อง</label>
-                    <select id="modalStatus" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 font-medium">
-                        <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
-                        <option value="รอตรวจสอบ">รอตรวจสอบ</option>
-                        <option value="รอแก้ไข">รอแก้ไข</option>
-                    </select>
-                </div>
-
-                <div class="pt-3 flex justify-end gap-2 border-t">
-                    <button type="button" onclick="closeStudentModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-medium shadow-sm">บันทึกข้อมูล</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Custom Confirm Delete Modal -->
-    <div id="confirmDeleteModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-100">
-            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
-                <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <div>
-                <h3 class="font-bold text-slate-800 text-base">ยืนยันการลบข้อมูล</h3>
-                <p class="text-xs text-slate-500 mt-1" id="confirmDeleteText">คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?</p>
-            </div>
-            <div class="flex justify-center gap-2 pt-2 text-xs">
-                <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50">ยกเลิก</button>
-                <button id="confirmDeleteBtn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-medium shadow-sm">ยืนยันลบ</button>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button onclick="closeSignatureModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-medium">ยกเลิก</button>
+                <button onclick="confirmSignatureAction()" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> ยืนยันการลงนาม
+                </button>
             </div>
         </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 hidden bg-slate-800 text-white text-sm px-4 py-3 rounded-xl shadow-lg transition-all flex items-center space-x-2 z-50">
-        <i class="fa-solid fa-circle-check text-emerald-400"></i>
-        <span id="toastMessage">ดำเนินการสำเร็จ</span>
     </div>
 
     <script>
-        let rawStudentsData = [
-            { id: "268113100106", name: "นางสาวณัฐวลัญช์ สุระกำแหง", major: "สาขาวิชาการบัญชี", phone: "0843121560", email: "natwaran.s@rmutsvmail.com", company: "สำนักงาน กู๊ดไลฟ์ แอคเเท็ก แอนด์ คอนซัลท์", dept: "ฝ่ายบัญชี", address: "76/10 หมู่ 8 ต.กำแพงเพชร อ.รัตภูมิ จ.สงขลา", status: "อนุมัติแล้ว" },
-            { id: "268113100067", name: "นางสาวสุกัลยา ฉีดอิ่ม", major: "สาขาวิชาการบัญชี", phone: "0653093820", email: "sukanya.che@rmutsvmail.com", company: "หจก.กระแสสินธุ์การโยธา", dept: "ฝ่ายบัญชี", address: "15 ซอยชำนาญ ตำบลคอหงส์ อำเภอหาดใหญ่ จังหวัดสงขลา", status: "อนุมัติแล้ว" },
-            { id: "268113090002", name: "นายอดิศา ชำนาญนา", major: "สาขาวิชาการตลาดดิจิทัล", phone: "0638577110", email: "adisa.c@rmutsvmail.com", company: "KFC สาขารัตภูมิ", dept: "การตลาด", address: "78/5 ม.1 ต.ควนรู อ.รัตภูมิ", status: "อนุมัติแล้ว" },
-            { id: "268113090092", name: "นางสาวธารใส กาญจนโรจน์", major: "สาขาวิชาการตลาดดิจิทัล", phone: "0963531015", email: "tansai.k@rmutsvmail.com", company: "สหกรณ์การเกษตรรัตภูมิ จำกัด", dept: "ฝ่ายการตลาด", address: "เลขที่ 2 หมู่ 1 ถนนยนตรการกำชร ตำบลกำแพงเพชร", status: "รอตรวจสอบ" },
-            { id: "268113010066", name: "นางสาวจุฑารัตน์ อ่อนเเก้ว", major: "สาขาวิชาเทคโนโลยีดิจิทัล", phone: "0961407425", email: "jutarat.o@rmutsvmail.com", company: "เทศบาลตำบลระโนด", dept: "ฝ่ายธุรการ", address: "229 ถ.ชายวารี ต.ระโนด อ.ระโนด จ.สงขลา", status: "อนุมัติแล้ว" },
-            { id: "268113010100", name: "นายมูฮำหมัด หมัดศิริ", major: "สาขาวิชาเทคโนโลยีดิจิทัล", phone: "0627940381", email: "Muhammad.mad@rmutsvmail.com", company: "สำนักงานพิสูจน์หลักฐานตำรวจ9", dept: "ศูนย์พิสูจน์หลักฐาน9", address: "หมู่1 ตำบลฉลุง อำเภอหาดใหญ่ จังหวัดสงขลา", status: "รอตรวจสอบ" },
-            { id: "267113060050", name: "นายสมพงศ์ หมิดชู", major: "สาขาวิชาช่างยนต์", phone: "0980454039", email: "somporng.m@rmutsvmail.com", company: "อีซูซุสหมอเตอร์ สาขารัตภูมิ", dept: "เเผนกซ่อมเครื่องยนต์", address: "190 หมู่8 ตำบลกำเเพงเพชร อำเภอรัตภูมิ จังหวัดสงขลา", status: "อนุมัติแล้ว" },
-            { id: "267113060079", name: "นายโชคทวี ฉายแสง", major: "สาขาวิชาช่างยนต์", phone: "0659631586", email: "chokthawee.c@rmutsvmail.com", company: "CP MECHANIC", dept: "เเผนกซ่อมเครื่องยนต์", address: "5/23 หาดใหญ่ สงขลา", status: "รอแก้ไข" },
-            { id: "267113050044", name: "นายธนพัฒน์ สุขมะนู", major: "สาขาวิชาช่างไฟฟ้า", phone: "0804735073", email: "tanaphat.su@rmutsvmail.com", company: "บริษัท เซฟสกิน เมดดิคอล แอนด์ ไซเอนทิฟิก (ประเทศไทย)", dept: "ฝ่ายช่างไฟฟ้า", address: "200 หมู่ 8 ถ. กาญจนวนิช ตำบล ปริก อำเภอสะเดา สงขลา", status: "อนุมัติแล้ว" },
-            { id: "267113050090", name: "นายชารีฟ มรรคาเขต", major: "สาขาวิชาช่างไฟฟ้า", phone: "0823195127", email: "chareef.m@rmutsvmail.com", company: "องค์การบริหารส่วนตำบลท่าเรือ", dept: "ช่างไฟฟ้า", address: "ม.4 องค์การบริหารส่วนตำบลท่าเรือ อำเภอท่าแพ จังหวัดสตูล", status: "อนุมัติแล้ว" }
-        ];
+        let activeEsignStudentId = null;
 
-        let activeUser = null;
-        let selectedRole = 'student';
-        let selectedStudentIds = new Set();
-        let currentFilteredData = [];
-        let pendingDeleteId = null;
+        function quickDemoLogin(roleKey) {
+            selectLoginRole(roleKey);
+            const fakeEvent = { preventDefault: () => {} };
+            handleEpassportLogin(fakeEvent);
+        }
 
-        const roleConfig = {
-            student: { title: "นักศึกษา", name: "นักศึกษา e-Passport", major: "วิทยาลัยรัตภูมิ", emoji: "🎓", badgeBg: "bg-blue-500" },
-            officer: { title: "เจ้าหน้าที่สหกิจ", name: "คุณงานดี บริการเยี่ยม", major: "ฝ่ายวิชาการและวิจัย รัตภูมิ", emoji: "💼", badgeBg: "bg-emerald-500" },
-            head: { title: "หัวหน้าสาขาวิชา", name: "ผศ.ดร.สมชาย วิชาการดี", major: "สาขาเทคโนโลยีสารสนเทศ", emoji: "👔", badgeBg: "bg-amber-500" },
-            director: { title: "ผู้อำนวยการ", name: "ผศ.ดร.วิชัย บัญชาการ", major: "วิทยาลัยรัตภูมิ มทร.ศรีวิชัย", emoji: "🏛️", badgeBg: "bg-purple-500" }
-        };
-
-        function selectLoginRole(roleKey) {
-            selectedRole = roleKey;
-            document.querySelectorAll('.role-tab').forEach(tab => {
-                tab.className = 'role-tab py-2 px-2 rounded-lg text-slate-500 hover:text-slate-700';
-            });
-            document.getElementById(`tab-${roleKey}`).className = 'role-tab py-2 px-2 rounded-lg bg-white text-sky-600 shadow-sm font-semibold';
+        function previewSamplePDF(docType, studentName) {
+            document.getElementById('pdfModalTitle').innerText = `ตัวอย่างเอกสาร ${docType}`;
+            document.getElementById('pdfDocType').innerText = docType;
+            document.getElementById('pdfStudentName').innerText = studentName || activeUser.name;
             
-            const uInput = document.getElementById('usernameInput');
-            if (roleKey === 'student') {
-                uInput.value = '268113100106';
-            } else {
-                uInput.value = roleKey + '.rat';
-            }
+            document.getElementById('pdfModal').classList.remove('hidden');
+            document.getElementById('pdfModal').classList.add('flex');
         }
 
-        function handleEpassportLogin(event) {
-            event.preventDefault();
-            const username = document.getElementById('usernameInput').value.trim();
+        function closePdfModal() {
+            document.getElementById('pdfModal').classList.add('hidden');
+            document.getElementById('pdfModal').classList.remove('flex');
+        }
 
-            if (selectedRole === 'student') {
-                const found = rawStudentsData.find(s => s.id === username);
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "รหัสนักศึกษา,ชื่อ-นามสกุล,สาขาวิชา,เบอร์โทร,สถานประกอบการ,แผนก,สถานะ\n";
+
+            currentFilteredData.forEach(s => {
+                csvContent += `"${s.id}","${s.name}","${s.major}","${s.phone || ''}","${s.company}","${s.dept}","${s.status}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `รายงานนักศึกษาฝึกงาน_รัตภูมิ_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast("ส่งออกไฟล์ CSV สรุปข้อมูลสำเร็จ!");
+        }
+
+        function openSignatureModal(studentId) {
+            activeEsignStudentId = studentId;
+            const student = rawStudentsData.find(s => s.id === studentId);
+            document.getElementById('signatureTargetText').innerText = `กำลังลงนามหนังสือส่งตัวให้: ${student ? student.name : studentId}`;
+            
+            document.getElementById('signatureModal').classList.remove('hidden');
+            document.getElementById('signatureModal').classList.add('flex');
+        }
+
+        function closeSignatureModal() {
+            activeEsignStudentId = null;
+            document.getElementById('signatureModal').classList.add('hidden');
+            document.getElementById('signatureModal').classList.remove('flex');
+        }
+
+        function confirmSignatureAction() {
+            if (activeEsignStudentId) {
+                const found = rawStudentsData.find(s => s.id === activeEsignStudentId);
                 if (found) {
-                    activeUser = found;
-                } else {
-                    activeUser = {
-                        id: username,
-                        name: "นักศึกษา นำเข้าใหม่",
-                        major: "สาขาวิชาเทคโนโลยีดิจิทัล",
-                        phone: "0812345678",
-                        email: username + "@rmutsvmail.com",
-                        company: "ระบุสถานที่ฝึกงาน",
-                        dept: "แผนกฝึกงาน",
-                        address: "ที่อยู่สถานประกอบการ",
-                        status: "รอตรวจสอบ"
-                    };
-                    rawStudentsData.push(activeUser);
+                    found.status = "อนุมัติแล้ว";
                 }
-            } else {
-                const config = roleConfig[selectedRole];
-                activeUser = { id: username, name: config.name, major: config.major };
-            }
-
-            document.getElementById('authScreen').classList.add('hidden');
-            document.getElementById('mainAppScreen').classList.remove('hidden');
-            applyRoleView(selectedRole);
-            showToast(`ยืนยันตัวตนผ่าน e-Passport สำเร็จ!`);
-        }
-
-        function logout() {
-            document.getElementById('mainAppScreen').classList.add('hidden');
-            document.getElementById('authScreen').classList.remove('hidden');
-        }
-
-        function applyRoleView(roleKey) {
-            const config = roleConfig[roleKey];
-
-            document.getElementById('currentRoleText').innerText = config.title;
-            document.getElementById('roleEmoji').innerText = config.emoji;
-            document.getElementById('roleBadgeIcon').className = `w-2.5 h-2.5 rounded-full ${config.badgeBg}`;
-            document.getElementById('userGreetingName').innerText = activeUser.name;
-            document.getElementById('roleDescription').innerText = `e-Passport Account: ${activeUser.id} | ${activeUser.major}`;
-
-            document.getElementById('studentSelfView').classList.add('hidden');
-            document.getElementById('officerPortalView').classList.add('hidden');
-            document.getElementById('headPortalView').classList.add('hidden');
-            document.getElementById('directorPortalView').classList.add('hidden');
-
-            if (roleKey === 'student') {
-                document.getElementById('studentSelfView').classList.remove('hidden');
-                populateStudentSelfFields();
-                renderStudentStatus();
-            } else if (roleKey === 'officer') {
-                document.getElementById('officerPortalView').classList.remove('hidden');
-                renderMajorCounters();
-                handleSearchAndFilter();
-            } else if (roleKey === 'head') {
-                document.getElementById('headPortalView').classList.remove('hidden');
-                renderHeadView();
-            } else if (roleKey === 'director') {
-                document.getElementById('directorPortalView').classList.remove('hidden');
+                showToast(`อนุมัติและลงนาม E-Signature เรียบร้อยแล้ว!`);
+                closeSignatureModal();
                 renderDirectorView();
             }
         }
 
-        function populateStudentSelfFields() {
-            document.getElementById('studentIdInput').value = activeUser.id || '';
-            document.getElementById('studentNameInput').value = activeUser.name || '';
-            document.getElementById('studentMajorInput').value = activeUser.major || 'สาขาวิชาเทคโนโลยีดิจิทัล';
-            document.getElementById('studentPhoneInput').value = activeUser.phone || '';
-            document.getElementById('studentEmailInput').value = activeUser.email || '';
-
-            document.getElementById('reqCompany').value = activeUser.company || '';
-            document.getElementById('reqPosition').value = activeUser.dept || '';
-            document.getElementById('reqAddress').value = activeUser.address || '';
-        }
-
-        function saveStudentSelfProfile(event) {
-            event.preventDefault();
-            activeUser.name = document.getElementById('studentNameInput').value;
-            activeUser.major = document.getElementById('studentMajorInput').value;
-            activeUser.phone = document.getElementById('studentPhoneInput').value;
-            activeUser.email = document.getElementById('studentEmailInput').value;
-
-            // Sync with main array
-            const idx = rawStudentsData.findIndex(s => s.id === activeUser.id);
-            if (idx !== -1) {
-                rawStudentsData[idx] = { ...activeUser };
-            }
-
-            document.getElementById('userGreetingName').innerText = activeUser.name;
-            showToast('บันทึกการแก้ไขข้อมูลส่วนตัวสำเร็จ!');
-        }
-
-        function saveStudentSelfCompany(event) {
-            event.preventDefault();
-            activeUser.company = document.getElementById('reqCompany').value;
-            activeUser.dept = document.getElementById('reqPosition').value;
-            activeUser.address = document.getElementById('reqAddress').value;
-
-            const idx = rawStudentsData.findIndex(s => s.id === activeUser.id);
-            if (idx !== -1) {
-                rawStudentsData[idx] = { ...activeUser };
-            }
-
-            renderStudentStatus();
-            showToast('อัปเดตข้อมูลสถานที่ฝึกงานสำเร็จ!');
-        }
-
-        function switchStudentTab(tabKey) {
-            document.querySelectorAll('.student-nav-tab').forEach(tab => {
-                tab.className = 'student-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2';
-            });
-            document.querySelectorAll('.student-tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            document.getElementById(`stab-${tabKey}`).className = 'student-nav-tab py-2.5 px-4 text-sky-600 border-b-2 border-sky-600 font-semibold whitespace-nowrap flex items-center gap-2';
-            document.getElementById(`studentContent-${tabKey}`).classList.remove('hidden');
-        }
-
-        function renderStudentStatus() {
-            const card = document.getElementById('statusDetailsCard');
-            card.innerHTML = `
-                <div class="space-y-3">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-3 gap-2">
-                        <div>
-                            <p class="text-sm font-semibold text-slate-800">${activeUser.company}</p>
-                            <p class="text-slate-500 mt-0.5">แผนก/ฝ่าย: ${activeUser.dept} | ผู้ยื่น: ${activeUser.name} (${activeUser.id})</p>
+        function renderDirectorView() {
+            const container = document.getElementById('directorEsignCards');
+            container.innerHTML = rawStudentsData.map(s => `
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:border-purple-200 transition">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <p class="font-bold text-slate-800 text-sm">หนังสือส่งตัว - ${s.name}</p>
+                            <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-semibold">${s.id}</span>
                         </div>
-                        <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-medium">${activeUser.status}</span>
+                        <p class="text-slate-500 mt-1"><i class="fa-solid fa-building mr-1 text-slate-400"></i>บริษัท: ${s.company} (${s.major})</p>
                     </div>
-                    <p class="text-sky-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>ข้อมูลล่าสุดได้รับการอัปเดตแล้วในระบบ</p>
-                </div>
-            `;
-        }
-
-        function renderMajorCounters() {
-            const counts = {};
-            rawStudentsData.forEach(s => {
-                counts[s.major] = (counts[s.major] || 0) + 1;
-            });
-
-            const majors = [
-                { name: "สาขาวิชาการบัญชี", label: "บัญชี (ACC)" },
-                { name: "สาขาวิชาการตลาดดิจิทัล", label: "การตลาด (DMK)" },
-                { name: "สาขาวิชาเทคโนโลยีดิจิทัล", label: "ดิจิทัล (DBT)" },
-                { name: "สาขาวิชาช่างยนต์", label: "ช่างยนต์ (MP)" },
-                { name: "สาขาวิชาช่างไฟฟ้า", label: "ช่างไฟฟ้า (ECT)" }
-            ];
-
-            const grid = document.getElementById('majorCountersGrid');
-            grid.innerHTML = majors.map(m => `
-                <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm text-center">
-                    <p class="text-[11px] text-slate-400 font-medium">${m.label}</p>
-                    <p class="text-lg font-bold text-sky-600 mt-0.5">${counts[m.name] || 0} คน</p>
+                    <div class="flex items-center gap-2">
+                        <button onclick="previewSamplePDF('หนังสือส่งตัว', '${s.name}')" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-xl font-medium transition flex items-center gap-1">
+                            <i class="fa-solid fa-file-pdf text-rose-500"></i> ตรวจเอกสาร
+                        </button>
+                        <button onclick="openSignatureModal('${s.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-pen-nib"></i> ลงนาม E-Signature
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
