@@ -22,6 +22,13 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-700 min-h-screen">
 
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl z-50 hidden flex items-center gap-3 border border-slate-700 transition-all">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMessage" class="text-xs font-medium">ทำรายการสำเร็จ</span>
+    </div>
+
+    <!-- Login Screen (RMUTSV e-Passport) -->
     <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-sky-100 via-slate-50 to-indigo-100">
         <div class="bg-white rounded-3xl shadow-xl border border-slate-100 max-w-md w-full p-8 relative overflow-hidden">
             
@@ -107,6 +114,7 @@
         </div>
     </div>
 
+    <!-- Main Application Portal Screen -->
     <div id="mainAppScreen" class="hidden">
         <header class="bg-white border-b border-slate-100 sticky top-0 z-10 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -156,6 +164,7 @@
                 </button>
             </div>
 
+            <!-- Student Portal View -->
             <div id="studentSelfView" class="space-y-6">
                 <div class="flex border-b border-slate-200 overflow-x-auto space-x-2 text-sm font-medium">
                     <button onclick="switchStudentTab('profile')" id="stab-profile" class="student-nav-tab py-2.5 px-4 text-sky-600 border-b-2 border-sky-600 font-semibold whitespace-nowrap flex items-center gap-2">
@@ -253,6 +262,7 @@
                     </form>
                 </div>
 
+                <!-- Tab 3: Upload Documents -->
                 <div id="studentContent-documents" class="student-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
                     <h3 class="text-base font-semibold text-slate-800 border-b pb-3 flex items-center justify-between">
                         <span class="flex items-center gap-2"><i class="fa-solid fa-file-arrow-up text-sky-600"></i> เอกสารประกอบการยื่นคำร้อง (PDF)</span>
@@ -277,6 +287,7 @@
                     </div>
                 </div>
 
+                <!-- Tab 4: Logbook -->
                 <div id="studentContent-logbook" class="student-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
                     <h3 class="text-base font-semibold text-slate-800 border-b pb-3 flex items-center gap-2">
                         <i class="fa-solid fa-book-bookmark text-sky-600"></i> บันทึกการปฏิบัติงานรายวัน (Logbook)
@@ -297,6 +308,7 @@
                     <div id="logbookList" class="space-y-2 text-xs"></div>
                 </div>
 
+                <!-- Tab 5: Status -->
                 <div id="studentContent-status" class="student-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
                     <h3 class="text-base font-semibold text-slate-800 border-b pb-3 flex items-center gap-2">
                         <i class="fa-solid fa-timeline text-sky-600"></i> สถานะการยื่นคำร้องเเละหนังสือส่งตัว
@@ -305,6 +317,7 @@
                 </div>
             </div>
 
+            <!-- Officer Portal View -->
             <div id="officerPortalView" class="hidden space-y-6">
                 <!-- Major Summary Cards -->
                 <div id="majorCountersGrid" class="grid grid-cols-2 md:grid-cols-5 gap-3"></div>
@@ -365,7 +378,7 @@
                         </div>
                     </div>
 
-                    <!-- Batch Actions Toolbar (Shown when items are selected) -->
+                    <!-- Batch Actions Toolbar -->
                     <div id="batchActionBar" class="hidden bg-sky-50 border border-sky-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
                         <div class="flex items-center gap-2 font-medium text-sky-800">
                             <i class="fa-solid fa-circle-info text-sky-600"></i>
@@ -406,6 +419,7 @@
                 </div>
             </div>
 
+            <!-- Head Portal View -->
             <div id="headPortalView" class="hidden space-y-6">
                 <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
                     <h3 class="text-base font-semibold text-slate-800 border-b pb-3">อนุมัติคำร้องระดับสาขาวิชา</h3>
@@ -413,6 +427,7 @@
                 </div>
             </div>
 
+            <!-- Director Portal View -->
             <div id="directorPortalView" class="hidden space-y-6">
                 <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
                     <div class="flex items-center justify-between border-b pb-3">
@@ -428,6 +443,94 @@
             </div>
 
         </main>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div id="studentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-100">
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base" id="modalTitle">แก้ไขข้อมูลนักศึกษา</h3>
+                <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="handleSaveStudentModal(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="modalIsEditMode" value="false">
+                <input type="hidden" id="modalOriginalId" value="">
+
+                <div>
+                    <label class="block font-medium text-slate-600 mb-1">รหัสนักศึกษา</label>
+                    <input type="text" id="modalId" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-600 mb-1">ชื่อ - นามสกุล</label>
+                    <input type="text" id="modalName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-600 mb-1">สาขาวิชา</label>
+                    <select id="modalMajor" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                        <option value="สาขาวิชาการบัญชี">สาขาวิชาการบัญชี</option>
+                        <option value="สาขาวิชาการตลาดดิจิทัล">สาขาวิชาการตลาดดิจิทัล</option>
+                        <option value="สาขาวิชาเทคโนโลยีดิจิทัล">สาขาวิชาเทคโนโลยีดิจิทัล</option>
+                        <option value="สาขาวิชาช่างยนต์">สาขาวิชาช่างยนต์</option>
+                        <option value="สาขาวิชาช่างไฟฟ้า">สาขาวิชาช่างไฟฟ้า</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-600 mb-1">เบอร์โทรศัพท์</label>
+                        <input type="text" id="modalPhone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-600 mb-1">อีเมล</label>
+                        <input type="email" id="modalEmail" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-600 mb-1">สถานประกอบการ</label>
+                        <input type="text" id="modalCompany" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-600 mb-1">แผนก/ตำแหน่ง</label>
+                        <input type="text" id="modalDept" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-600 mb-1">ที่อยู่บริษัท</label>
+                    <input type="text" id="modalAddress" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-600 mb-1">สถานะคำร้อง</label>
+                    <select id="modalStatus" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-medium">
+                        <option value="รอตรวจสอบ">รอตรวจสอบ</option>
+                        <option value="รอแก้ไข">รอแก้ไข</option>
+                        <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
+                    </select>
+                </div>
+
+                <div class="pt-3 flex justify-end gap-2">
+                    <button type="button" onclick="closeStudentModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-medium">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="confirmDeleteModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-100 text-center">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-base">ยืนยันการลบข้อมูล</h3>
+            <p class="text-xs text-slate-500" id="confirmDeleteText">คุณแน่ใจหรือไม่ที่จะลบรายชื่อนี้?</p>
+            <div class="pt-2 flex justify-center gap-2 text-xs">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-medium">ยกเลิก</button>
+                <button id="confirmDeleteBtn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-medium">ลบข้อมูล</button>
+            </div>
+        </div>
     </div>
 
     <!-- PDF Preview Modal -->
@@ -504,7 +607,56 @@
     </div>
 
     <script>
+        // Data State
+        let rawStudentsData = [
+            { id: "268113100106", name: "นายกิตติศักดิ์ ชัยชนะ", major: "สาขาวิชาเทคโนโลยีดิจิทัล", phone: "081-234-5678", email: "kittisak@rmutsv.ac.th", company: "บริษัท บิ๊กซี ซูเปอร์เซ็นเตอร์ จำกัด", dept: "เทคโนโลยีสารสนเทศ", address: "หาดใหญ่ สงขลา", status: "รอตรวจสอบ" },
+            { id: "267113050044", name: "นางสาวศิริพร บุญมี", major: "สาขาวิชาการบัญชี", phone: "089-876-5432", email: "siriporn@rmutsv.ac.th", company: "สำนักงานบัญชีสงขลาการบัญชี", dept: "บัญชีและการเงิน", address: "เมือง สงขลา", status: "อนุมัติแล้ว" },
+            { id: "268113100220", name: "นายธนกฤต วงศ์สว่าง", major: "สาขาวิชาการตลาดดิจิทัล", phone: "082-111-2233", email: "thanakrit@rmutsv.ac.th", company: "บริษัท เอสซีจี แพคเกจจิ้ง จำกัด", dept: "การตลาด", address: "สะเดา สงขลา", status: "รอแก้ไข" },
+            { id: "267113080012", name: "นายอนุชา สายชล", major: "สาขาวิชาช่างยนต์", phone: "084-555-6677", email: "anucha@rmutsv.ac.th", company: "โตโยต้าพิธานพาณิชย์ จำกัด", dept: "ศูนย์บริการเครื่องยนต์", address: "หาดใหญ่ สงขลา", status: "รอตรวจสอบ" },
+            { id: "268113090055", name: "นางสาวพิมลวรรณ สุขเสริฐ", major: "สาขาวิชาช่างไฟฟ้า", phone: "086-999-0011", email: "pimonwan@rmutsv.ac.th", company: "การไฟฟ้าส่วนภูมิภาค รัตภูมิ", dept: "วิศวกรรมไฟฟ้า", address: "รัตภูมิ สงขลา", status: "อนุมัติแล้ว" }
+        ];
+
+        let activeUserRole = "student";
+        let activeUser = { id: "268113100106", name: "นายกิตติศักดิ์ ชัยชนะ", role: "student" };
+        let selectedStudentIds = new Set();
+        let currentFilteredData = [...rawStudentsData];
+        let pendingDeleteId = null;
         let activeEsignStudentId = null;
+
+        // Role Switch Logic
+        function selectLoginRole(roleKey) {
+            activeUserRole = roleKey;
+            document.querySelectorAll('.role-tab').forEach(btn => {
+                btn.className = "role-tab py-2 px-2 rounded-lg text-slate-500 hover:text-slate-700 transition";
+            });
+            
+            const activeTab = document.getElementById(`tab-${roleKey}`);
+            if (activeTab) {
+                activeTab.className = "role-tab py-2 px-2 rounded-lg bg-white text-sky-600 shadow-sm font-semibold transition";
+            }
+
+            const usernameLabel = document.getElementById('usernameLabel');
+            const usernameInput = document.getElementById('usernameInput');
+            const usernameHint = document.getElementById('usernameHint');
+
+            if (roleKey === 'student') {
+                usernameLabel.innerText = "รหัสนักศึกษา (หรือ e-Passport ID)";
+                usernameInput.value = "268113100106";
+                usernameHint.innerText = "* ทดลองใช้รหัสนักศึกษา เช่น 268113100106, 267113050044";
+            } else if (roleKey === 'officer') {
+                usernameLabel.innerText = "e-Passport เจ้าหน้าที่สหกิจ";
+                usernameInput.value = "officer.coop";
+                usernameHint.innerText = "* รหัสผ่านเดโม: 12345678";
+            } else if (roleKey === 'head') {
+                usernameLabel.innerText = "e-Passport หัวหน้าสาขา";
+                usernameInput.value = "head.major";
+                usernameHint.innerText = "* รหัสผ่านเดโม: 12345678";
+            } else if (roleKey === 'director') {
+                usernameLabel.innerText = "e-Passport ผู้อำนวยการ";
+                usernameInput.value = "director.rattaphum";
+                usernameHint.innerText = "* รหัสผ่านเดโม: 12345678";
+            }
+        }
 
         function quickDemoLogin(roleKey) {
             selectLoginRole(roleKey);
@@ -512,85 +664,190 @@
             handleEpassportLogin(fakeEvent);
         }
 
-        function previewSamplePDF(docType, studentName) {
-            document.getElementById('pdfModalTitle').innerText = `ตัวอย่างเอกสาร ${docType}`;
-            document.getElementById('pdfDocType').innerText = docType;
-            document.getElementById('pdfStudentName').innerText = studentName || activeUser.name;
-            
-            document.getElementById('pdfModal').classList.remove('hidden');
-            document.getElementById('pdfModal').classList.add('flex');
+        function handleEpassportLogin(event) {
+            event.preventDefault();
+
+            const usernameVal = document.getElementById('usernameInput').value.trim();
+
+            if (activeUserRole === 'student') {
+                const foundStudent = rawStudentsData.find(s => s.id === usernameVal) || {
+                    id: usernameVal || "268113100106",
+                    name: "นักศึกษา ทดสอบ",
+                    major: "สาขาวิชาเทคโนโลยีดิจิทัล",
+                    phone: "081-234-5678",
+                    email: "student@rmutsv.ac.th",
+                    company: "บริษัท บิ๊กซี ซูเปอร์เซ็นเตอร์ จำกัด",
+                    dept: "เทคโนโลยีสารสนเทศ",
+                    address: "หาดใหญ่ สงขลา",
+                    status: "รอตรวจสอบ"
+                };
+                activeUser = { ...foundStudent, role: 'student' };
+            } else if (activeUserRole === 'officer') {
+                activeUser = { id: usernameVal, name: "เจ้าหน้าที่ งานสหกิจศึกษา", role: 'officer' };
+            } else if (activeUserRole === 'head') {
+                activeUser = { id: usernameVal, name: "ดร.สมชาย ใจดี (หัวหน้าสาขา)", role: 'head' };
+            } else if (activeUserRole === 'director') {
+                activeUser = { id: usernameVal, name: "ผศ.ดร.วิชัย บัญชาการ (ผู้อำนวยการ)", role: 'director' };
+            }
+
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainAppScreen').classList.remove('hidden');
+
+            setupRoleUI();
+            showToast(`เข้าสู่ระบบสำเร็จในฐานะ ${activeUser.name}`);
         }
 
-        function closePdfModal() {
-            document.getElementById('pdfModal').classList.add('hidden');
-            document.getElementById('pdfModal').classList.remove('flex');
-        }
+        function setupRoleUI() {
+            document.getElementById('userGreetingName').innerText = activeUser.name;
+            const roleBadgeIcon = document.getElementById('roleBadgeIcon');
+            const currentRoleText = document.getElementById('currentRoleText');
+            const roleEmoji = document.getElementById('roleEmoji');
+            const roleDescription = document.getElementById('roleDescription');
 
-        function exportToCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-            csvContent += "รหัสนักศึกษา,ชื่อ-นามสกุล,สาขาวิชา,เบอร์โทร,สถานประกอบการ,แผนก,สถานะ\n";
+            document.getElementById('studentSelfView').classList.add('hidden');
+            document.getElementById('officerPortalView').classList.add('hidden');
+            document.getElementById('headPortalView').classList.add('hidden');
+            document.getElementById('directorPortalView').classList.add('hidden');
 
-            currentFilteredData.forEach(s => {
-                csvContent += `"${s.id}","${s.name}","${s.major}","${s.phone || ''}","${s.company}","${s.dept}","${s.status}"\n`;
-            });
+            if (activeUser.role === 'student') {
+                roleBadgeIcon.className = "w-2.5 h-2.5 rounded-full bg-sky-500";
+                currentRoleText.innerText = "นักศึกษา";
+                roleEmoji.innerText = "🎓";
+                roleDescription.innerText = `รหัสนักศึกษา: ${activeUser.id} | สาขา: ${activeUser.major || 'วิทยาลัยรัตภูมิ'}`;
+                
+                document.getElementById('studentSelfView').classList.remove('hidden');
+                populateStudentForms();
+                renderStudentStatusCard();
+            } else if (activeUser.role === 'officer') {
+                roleBadgeIcon.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+                currentRoleText.innerText = "เจ้าหน้าที่วิทยาลัย";
+                roleEmoji.innerText = "💼";
+                roleDescription.innerText = `บัญชีผู้ใช้: ${activeUser.id} | สิทธิ์: จัดการข้อมูล เเละนำเข้า Excel`;
 
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `รายงานนักศึกษาฝึกงาน_รัตภูมิ_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+                document.getElementById('officerPortalView').classList.remove('hidden');
+                renderMajorCounters();
+                handleSearchAndFilter();
+            } else if (activeUser.role === 'head') {
+                roleBadgeIcon.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+                currentRoleText.innerText = "หัวหน้าสาขาวิชา";
+                roleEmoji.innerText = "👔";
+                roleDescription.innerText = `บัญชีผู้ใช้: ${activeUser.id} | สิทธิ์: พิจารณาอนุมัติคำร้องระดับสาขา`;
 
-            showToast("ส่งออกไฟล์ CSV สรุปข้อมูลสำเร็จ!");
-        }
+                document.getElementById('headPortalView').classList.remove('hidden');
+                renderHeadView();
+            } else if (activeUser.role === 'director') {
+                roleBadgeIcon.className = "w-2.5 h-2.5 rounded-full bg-purple-500";
+                currentRoleText.innerText = "ผู้อำนวยการ";
+                roleEmoji.innerText = "🏛️";
+                roleDescription.innerText = `บัญชีผู้ใช้: ${activeUser.id} | สิทธิ์: ลงนาม E-Signature ออกหนังสือส่งตัว`;
 
-        function openSignatureModal(studentId) {
-            activeEsignStudentId = studentId;
-            const student = rawStudentsData.find(s => s.id === studentId);
-            document.getElementById('signatureTargetText').innerText = `กำลังลงนามหนังสือส่งตัวให้: ${student ? student.name : studentId}`;
-            
-            document.getElementById('signatureModal').classList.remove('hidden');
-            document.getElementById('signatureModal').classList.add('flex');
-        }
-
-        function closeSignatureModal() {
-            activeEsignStudentId = null;
-            document.getElementById('signatureModal').classList.add('hidden');
-            document.getElementById('signatureModal').classList.remove('flex');
-        }
-
-        function confirmSignatureAction() {
-            if (activeEsignStudentId) {
-                const found = rawStudentsData.find(s => s.id === activeEsignStudentId);
-                if (found) {
-                    found.status = "อนุมัติแล้ว";
-                }
-                showToast(`อนุมัติและลงนาม E-Signature เรียบร้อยแล้ว!`);
-                closeSignatureModal();
+                document.getElementById('directorPortalView').classList.remove('hidden');
                 renderDirectorView();
             }
         }
 
-        function renderDirectorView() {
-            const container = document.getElementById('directorEsignCards');
-            container.innerHTML = rawStudentsData.map(s => `
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:border-purple-200 transition">
+        function logout() {
+            document.getElementById('mainAppScreen').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
+            showToast('ออกจากระบบเรียบร้อยแล้ว');
+        }
+
+        // Student Handlers
+        function switchStudentTab(tabKey) {
+            document.querySelectorAll('.student-nav-tab').forEach(b => {
+                b.className = "student-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2";
+            });
+            document.querySelectorAll('.student-tab-content').forEach(c => c.classList.add('hidden'));
+
+            const tabBtn = document.getElementById(`stab-${tabKey}`);
+            if (tabBtn) {
+                tabBtn.className = "student-nav-tab py-2.5 px-4 text-sky-600 border-b-2 border-sky-600 font-semibold whitespace-nowrap flex items-center gap-2";
+            }
+            const content = document.getElementById(`studentContent-${tabKey}`);
+            if (content) content.classList.remove('hidden');
+        }
+
+        function populateStudentForms() {
+            document.getElementById('studentIdInput').value = activeUser.id || '';
+            document.getElementById('studentNameInput').value = activeUser.name || '';
+            document.getElementById('studentMajorInput').value = activeUser.major || 'สาขาวิชาเทคโนโลยีดิจิทัล';
+            document.getElementById('studentPhoneInput').value = activeUser.phone || '';
+            document.getElementById('studentEmailInput').value = activeUser.email || '';
+
+            document.getElementById('reqCompany').value = activeUser.company || '';
+            document.getElementById('reqPosition').value = activeUser.dept || '';
+            document.getElementById('reqAddress').value = activeUser.address || '';
+        }
+
+        function saveStudentSelfProfile(event) {
+            event.preventDefault();
+            activeUser.name = document.getElementById('studentNameInput').value.trim();
+            activeUser.major = document.getElementById('studentMajorInput').value;
+            activeUser.phone = document.getElementById('studentPhoneInput').value.trim();
+            activeUser.email = document.getElementById('studentEmailInput').value.trim();
+
+            const idx = rawStudentsData.findIndex(s => s.id === activeUser.id);
+            if (idx !== -1) {
+                rawStudentsData[idx] = { ...rawStudentsData[idx], ...activeUser };
+            }
+
+            document.getElementById('userGreetingName').innerText = activeUser.name;
+            showToast('บันทึกข้อมูลส่วนตัวสำเร็จ!');
+        }
+
+        function saveStudentSelfCompany(event) {
+            event.preventDefault();
+            activeUser.company = document.getElementById('reqCompany').value.trim();
+            activeUser.dept = document.getElementById('reqPosition').value.trim();
+            activeUser.address = document.getElementById('reqAddress').value.trim();
+
+            const idx = rawStudentsData.findIndex(s => s.id === activeUser.id);
+            if (idx !== -1) {
+                rawStudentsData[idx] = { ...rawStudentsData[idx], ...activeUser };
+            }
+
+            renderStudentStatusCard();
+            showToast('อัปเดตข้อมูลสถานที่ฝึกงานสำเร็จ!');
+        }
+
+        function renderStudentStatusCard() {
+            const card = document.getElementById('statusDetailsCard');
+            let statusBadge = `<span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-bold">รอตรวจสอบ</span>`;
+            if (activeUser.status === 'อนุมัติแล้ว') statusBadge = `<span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-bold">อนุมัติแล้ว</span>`;
+            if (activeUser.status === 'รอแก้ไข') statusBadge = `<span class="bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-bold">รอแก้ไข</span>`;
+
+            card.innerHTML = `
+                <div class="flex items-center justify-between border-b pb-3 mb-3">
                     <div>
-                        <div class="flex items-center gap-2">
-                            <p class="font-bold text-slate-800 text-sm">หนังสือส่งตัว - ${s.name}</p>
-                            <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-semibold">${s.id}</span>
-                        </div>
-                        <p class="text-slate-500 mt-1"><i class="fa-solid fa-building mr-1 text-slate-400"></i>บริษัท: ${s.company} (${s.major})</p>
+                        <p class="font-bold text-slate-800 text-sm">${activeUser.name} (${activeUser.id})</p>
+                        <p class="text-slate-500">${activeUser.major}</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="previewSamplePDF('หนังสือส่งตัว', '${s.name}')" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-xl font-medium transition flex items-center gap-1">
-                            <i class="fa-solid fa-file-pdf text-rose-500"></i> ตรวจเอกสาร
-                        </button>
-                        <button onclick="openSignatureModal('${s.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-pen-nib"></i> ลงนาม E-Signature
-                        </button>
-                    </div>
+                    ${statusBadge}
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-600">
+                    <p><strong>สถานที่ฝึกงาน:</strong> ${activeUser.company || '-'}</p>
+                    <p><strong>ตำแหน่ง/แผนก:</strong> ${activeUser.dept || '-'}</p>
+                    <p><strong>เบอร์โทรศัพท์:</strong> ${activeUser.phone || '-'}</p>
+                    <p><strong>อีเมล:</strong> ${activeUser.email || '-'}</p>
+                </div>
+            `;
+        }
+
+        // Officer Data Table & Counters
+        function renderMajorCounters() {
+            const counts = {};
+            rawStudentsData.forEach(s => {
+                counts[s.major] = (counts[s.major] || 0) + 1;
+            });
+
+            const majors = ["สาขาวิชาการบัญชี", "สาขาวิชาการตลาดดิจิทัล", "สาขาวิชาเทคโนโลยีดิจิทัล", "สาขาวิชาช่างยนต์", "สาขาวิชาช่างไฟฟ้า"];
+            const colors = ["from-sky-500 to-blue-600", "from-purple-500 to-indigo-600", "from-emerald-500 to-teal-600", "from-amber-500 to-orange-600", "from-rose-500 to-pink-600"];
+
+            const container = document.getElementById('majorCountersGrid');
+            container.innerHTML = majors.map((m, idx) => `
+                <div class="bg-gradient-to-br ${colors[idx]} text-white p-4 rounded-2xl shadow-sm">
+                    <p class="text-[11px] opacity-90 truncate">${m.replace('สาขาวิชา', '')}</p>
+                    <p class="text-2xl font-bold mt-1">${counts[m] || 0} <span class="text-xs font-normal opacity-80">คน</span></p>
                 </div>
             `).join('');
         }
@@ -723,6 +980,7 @@
             handleSearchAndFilter();
         }
 
+        // Modals Logic
         function openAddStudentModal() {
             document.getElementById('modalTitle').innerText = "เพิ่มนักศึกษาใหม่";
             document.getElementById('modalIsEditMode').value = "false";
@@ -841,6 +1099,7 @@
             }
         }
 
+        // Head and Director Views
         function renderHeadView() {
             const container = document.getElementById('headRequestCards');
             container.innerHTML = rawStudentsData.slice(0, 4).map(s => `
@@ -864,14 +1123,84 @@
         function renderDirectorView() {
             const container = document.getElementById('directorEsignCards');
             container.innerHTML = rawStudentsData.slice(0, 3).map(s => `
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex justify-between items-center text-xs">
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:border-purple-200 transition">
                     <div>
-                        <p class="font-bold text-slate-800">หนังสือส่งตัว - ${s.name}</p>
-                        <p class="text-slate-500">บริษัท: ${s.company}</p>
+                        <div class="flex items-center gap-2">
+                            <p class="font-bold text-slate-800 text-sm">หนังสือส่งตัว - ${s.name}</p>
+                            <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-semibold">${s.id}</span>
+                        </div>
+                        <p class="text-slate-500 mt-1"><i class="fa-solid fa-building mr-1 text-slate-400"></i>บริษัท: ${s.company} (${s.major})</p>
                     </div>
-                    <button onclick="showToast('ผู้อำนวยการลงนามอิเล็กทรอนิกส์เรียบร้อย')" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl font-medium transition">ลงนาม E-Signature</button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="previewSamplePDF('หนังสือส่งตัว', '${s.name}')" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-xl font-medium transition flex items-center gap-1">
+                            <i class="fa-solid fa-file-pdf text-rose-500"></i> ตรวจเอกสาร
+                        </button>
+                        <button onclick="openSignatureModal('${s.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-pen-nib"></i> ลงนาม E-Signature
+                        </button>
+                    </div>
                 </div>
             `).join('');
+        }
+
+        function openSignatureModal(studentId) {
+            activeEsignStudentId = studentId;
+            const student = rawStudentsData.find(s => s.id === studentId);
+            document.getElementById('signatureTargetText').innerText = `กำลังลงนามหนังสือส่งตัวให้: ${student ? student.name : studentId}`;
+            
+            document.getElementById('signatureModal').classList.remove('hidden');
+            document.getElementById('signatureModal').classList.add('flex');
+        }
+
+        function closeSignatureModal() {
+            activeEsignStudentId = null;
+            document.getElementById('signatureModal').classList.add('hidden');
+            document.getElementById('signatureModal').classList.remove('flex');
+        }
+
+        function confirmSignatureAction() {
+            if (activeEsignStudentId) {
+                const found = rawStudentsData.find(s => s.id === activeEsignStudentId);
+                if (found) {
+                    found.status = "อนุมัติแล้ว";
+                }
+                showToast(`อนุมัติและลงนาม E-Signature เรียบร้อยแล้ว!`);
+                closeSignatureModal();
+                renderDirectorView();
+            }
+        }
+
+        function previewSamplePDF(docType, studentName) {
+            document.getElementById('pdfModalTitle').innerText = `ตัวอย่างเอกสาร ${docType}`;
+            document.getElementById('pdfDocType').innerText = docType;
+            document.getElementById('pdfStudentName').innerText = studentName || activeUser.name;
+            
+            document.getElementById('pdfModal').classList.remove('hidden');
+            document.getElementById('pdfModal').classList.add('flex');
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdfModal').classList.add('hidden');
+            document.getElementById('pdfModal').classList.remove('flex');
+        }
+
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "รหัสนักศึกษา,ชื่อ-นามสกุล,สาขาวิชา,เบอร์โทร,สถานประกอบการ,แผนก,สถานะ\n";
+
+            currentFilteredData.forEach(s => {
+                csvContent += `"${s.id}","${s.name}","${s.major}","${s.phone || ''}","${s.company}","${s.dept}","${s.status}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `รายงานนักศึกษาฝึกงาน_รัตภูมิ_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast("ส่งออกไฟล์ CSV สรุปข้อมูลสำเร็จ!");
         }
 
         function handleExcelUpload(event) {
