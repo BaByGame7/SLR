@@ -39,7 +39,7 @@
 
             <!-- Role Selector Tabs -->
             <div class="mb-6">
-                <label class="block text-xs font-medium text-slate-500 mb-2">เลือกประเภทผู้ใช้งาน</label>
+                <label class="block text-xs font-medium text-slate-500 mb-2">เลือกประเภทผู้ใช้งานเพื่อเข้าสู่ระบบ</label>
                 <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-2xl text-xs font-medium">
                     <button type="button" onclick="selectLoginRole('student')" id="tab-student" class="role-tab py-2 px-3 rounded-xl transition text-center bg-white text-sky-600 shadow-sm font-medium">🎓 นักศึกษา</button>
                     <button type="button" onclick="selectLoginRole('officer')" id="tab-officer" class="role-tab py-2 px-3 rounded-xl transition text-center text-slate-500 hover:text-slate-700">💼 เจ้าหน้าที่</button>
@@ -66,14 +66,6 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between text-xs text-slate-500 pt-1">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" class="rounded border-slate-300 text-sky-500 focus:ring-sky-200">
-                        <span>จดจำการเข้าสู่ระบบ</span>
-                    </label>
-                    <a href="#" onclick="alert('โปรดติดต่อเจ้าหน้าที่งานสหกิจศึกษาเพื่อรีเซ็ตรหัสผ่าน')" class="text-sky-500 hover:underline">ลืมรหัสผ่าน?</a>
-                </div>
-
                 <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-2.5 rounded-xl transition shadow-md shadow-sky-100 text-sm mt-2">
                     เข้าสู่ระบบ
                 </button>
@@ -94,7 +86,7 @@
                         <i class="fa-solid font-bold fa-graduation-cap text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="font-semibold text-lg text-slate-800 leading-tight">Internship Management</h1>
+                        <h1 class="font-semibold text-lg text-slate-800 leading-tight">Coop Management</h1>
                         <p class="text-xs text-slate-400">ระบบจัดการสหกิจศึกษาและฝึกงาน</p>
                     </div>
                 </div>
@@ -108,7 +100,7 @@
 
                     <button onclick="logout()" title="ออกจากระบบ" class="text-slate-400 hover:text-rose-500 bg-slate-50 hover:bg-rose-50 p-2 rounded-xl transition text-xs flex items-center space-x-1">
                         <i class="fa-solid fa-right-from-bracket"></i>
-                        <span class="hidden sm:inline">ออกจากระบบ</span>
+                        <span class="hidden sm:inline">ออกจากระบบ / สลับผู้ใช้งาน</span>
                     </button>
                 </div>
             </div>
@@ -135,314 +127,273 @@
 
             <!-- STUDENT PORTAL VIEW -->
             <div id="studentSelfView" class="space-y-6">
-                
-                <!-- Student Menu Navigation Tabs -->
+                <!-- Student Navigation -->
                 <div class="flex border-b border-slate-200 overflow-x-auto space-x-2 text-sm font-medium">
                     <button onclick="switchStudentTab('profile')" id="stab-profile" class="student-nav-tab py-2.5 px-4 text-sky-600 border-b-2 border-sky-500 whitespace-nowrap flex items-center gap-2">
-                        <i class="fa-regular fa-user"></i> แก้ไขข้อมูลส่วนตัว
+                        <i class="fa-regular fa-user"></i> 1. แก้ไขข้อมูลส่วนตัว
                     </button>
                     <button onclick="switchStudentTab('request')" id="stab-request" class="student-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
-                        <i class="fa-regular fa-file-lines"></i> ยื่นคำร้องฝึกงาน
+                        <i class="fa-regular fa-file-lines"></i> 2. ยื่นคำร้องฝึกงาน
                     </button>
                     <button onclick="switchStudentTab('documents')" id="stab-documents" class="student-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
-                        <i class="fa-solid fa-paperclip"></i> แนบเอกสาร
+                        <i class="fa-solid fa-paperclip"></i> 3. แนบเอกสาร
                     </button>
                     <button onclick="switchStudentTab('status')" id="stab-status" class="student-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
-                        <i class="fa-solid fa-list-check"></i> ติดตามสถานะ
-                    </button>
-                    <button onclick="switchStudentTab('logbook')" id="stab-logbook" class="student-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
-                        <i class="fa-solid fa-book"></i> ส่ง Logbook
-                    </button>
-                    <button onclick="switchStudentTab('evaluation')" id="stab-evaluation" class="student-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
-                        <i class="fa-solid fa-star"></i> ดูผลประเมิน
+                        <i class="fa-solid fa-list-check"></i> 4. ติดตามสถานะ
                     </button>
                 </div>
 
-                <!-- TAB: แก้ไขข้อมูลส่วนตัว -->
+                <!-- TAB 1: แก้ไขข้อมูลส่วนตัว -->
                 <div id="studentContent-profile" class="student-tab-content bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                        <h3 class="text-base font-semibold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-user-pen text-sky-500"></i>
-                            ข้อมูลส่วนตัวนักศึกษา
-                        </h3>
-                        <span class="text-xs bg-emerald-50 text-emerald-600 font-medium px-2.5 py-1 rounded-full">ยืนยันตัวตนแล้ว</span>
-                    </div>
-
+                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-user-pen text-sky-500"></i> ข้อมูลส่วนตัวนักศึกษา
+                    </h3>
                     <form onsubmit="saveProfile(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
                             <label class="block text-xs font-medium text-slate-500 mb-1">รหัสนักศึกษา</label>
-                            <input type="text" id="studentIdInput" value="65011234" disabled class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-500 cursor-not-allowed">
+                            <input type="text" id="studentIdInput" value="65011234" disabled class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-500">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-500 mb-1">ชื่อ-นามสกุล</label>
-                            <input type="text" id="studentNameInput" value="นายสมชาย เข็มกลัด" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
+                            <input type="text" id="studentNameInput" value="นายสมชาย เข็มกลัด" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1">เลือกสาขาวิชา *</label>
-                            <select id="studentMajorSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                                <!-- Dynamic Department Options -->
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1">เกรดเฉลี่ยสะสม (GPAX)</label>
-                            <input type="text" value="3.45" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
+                            <label class="block text-xs font-medium text-slate-500 mb-1">สาขาวิชา</label>
+                            <select id="studentMajorSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700"></select>
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-500 mb-1">เบอร์โทรศัพท์</label>
-                            <input type="text" value="081-234-5678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
+                            <input type="text" id="studentPhoneInput" value="081-234-5678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700">
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1">อีเมลติดต่อ</label>
-                            <input type="email" value="somchai.k@student.ac.th" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-medium text-slate-500 mb-1">อาจารย์ที่ปรึกษา</label>
-                            <input type="text" value="ดร.สมเกียรติ วิชาการ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                        </div>
-                        <div class="md:col-span-2 text-right pt-2">
-                            <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-5 py-2.5 rounded-xl transition font-medium">บันทึกการเปลี่ยนแปลง</button>
+                        <div class="md:col-span-2 text-right">
+                            <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-5 py-2.5 rounded-xl transition font-medium">บันทึกข้อมูลส่วนตัว</button>
                         </div>
                     </form>
                 </div>
 
-                <!-- TAB: ยื่นคำร้อง -->
+                <!-- TAB 2: ยื่นคำร้อง -->
                 <div id="studentContent-request" class="student-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
-                    <div class="border-b border-slate-100 pb-4">
-                        <h3 class="text-base font-semibold text-slate-800 flex items-center gap-2">
-                            <i class="fa-regular fa-paper-plane text-sky-500"></i>
-                            ยื่นคำร้องขอปฏิบัติงานสหกิจศึกษา / ฝึกงาน
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">กรอกข้อมูลสถานประกอบการและตำแหน่งงานที่ต้องการสมัคร</p>
-                    </div>
-
+                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3 flex items-center gap-2">
+                        <i class="fa-regular fa-paper-plane text-sky-500"></i> ยื่นคำร้องขอฝึกงาน (เริ่มต้นขั้นตอนที่ 1)
+                    </h3>
                     <form onsubmit="submitRequest(event)" class="space-y-4 text-sm">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">สาขาวิชาที่กำลังศึกษา *</label>
-                                <select id="requestMajorSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                                    <!-- Dynamic Options -->
-                                </select>
+                                <select id="requestMajorSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700"></select>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">ตำแหน่งงานที่ขอฝึกงาน *</label>
-                                <input type="text" id="reqPosition" required placeholder="เช่น นักวิเคราะห์ระบบ / ช่างเทคนิคไฟฟ้า" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
+                                <input type="text" id="reqPosition" required placeholder="เช่น Web Developer / ช่างไฟฟ้า" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-slate-600 mb-1">บริษัท / สถานประกอบการ *</label>
+                                <input type="text" id="reqCompany" required placeholder="ระบุชื่อบริษัท หรือ สถานประกอบการ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700">
                             </div>
                         </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">ชื่อสถานประกอบการ / บริษัท *</label>
-                                <input type="text" id="reqCompany" required placeholder="ระบุชื่อบริษัท หรือ สถานประกอบการ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">ชื่อผู้ประสานงาน / พี่เลี้ยงฝึกงาน</label>
-                                <input type="text" id="reqContact" placeholder="ระบุชื่อผู้ติดต่อในบริษัท" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">วันที่เริ่มต้นฝึกงาน</label>
-                                <input type="date" id="reqStartDate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">วันที่สิ้นสุดฝึกงาน</label>
-                                <input type="date" id="reqEndDate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                            </div>
-                        </div>
-
-                        <div class="pt-2 text-right">
-                            <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-5 py-2.5 rounded-xl transition font-medium shadow-sm">ยื่นคำร้องฝึกงาน</button>
+                        <div class="text-right">
+                            <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-6 py-2.5 rounded-xl transition font-medium shadow-sm">
+                                <i class="fa-solid fa-paper-plane mr-1"></i> ยื่นคำร้องฝึกงาน
+                            </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- TAB: แนบเอกสาร -->
+                <!-- TAB 3: แนบเอกสาร -->
                 <div id="studentContent-documents" class="student-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
-                    <div class="border-b border-slate-100 pb-4">
-                        <h3 class="text-base font-semibold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-folder-open text-sky-500"></i>
-                            แนบเอกสารสมัครสหกิจศึกษา / ฝึกงาน
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">รองรับไฟล์ PDF หรือ JPG ขนาดไม่เกิน 5MB ต่อไฟล์</p>
-                    </div>
-
+                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-folder-open text-sky-500"></i> แนบเอกสารประกอบการฝึกงาน
+                    </h3>
                     <div class="space-y-4 text-sm">
-                        <!-- Doc 1 -->
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                            <div class="flex items-center space-x-3">
-                                <i class="fa-solid fa-file-pdf text-rose-500 text-2xl"></i>
-                                <div>
-                                    <p class="font-medium text-slate-700">1. ประวัติส่วนตัว (Resume / CV) <span class="text-rose-500">*จำเป็น</span></p>
-                                    <p class="text-xs text-slate-400" id="resumeStatus">สถานะ: <span class="text-emerald-600 font-medium">อัปโหลดแล้ว (resume_student.pdf)</span></p>
-                                </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-slate-700">1. ประวัติส่วนตัว (Resume / CV)</p>
+                                <p class="text-xs text-slate-400" id="resumeStatusText">สถานะ: <span class="text-amber-600 font-medium">ยังไม่อัปโหลด</span></p>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <input type="file" id="resumeFile" class="hidden" onchange="uploadDoc('resume')">
-                                <button onclick="document.getElementById('resumeFile').click()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg transition">อัปโหลด / เปลี่ยนไฟล์</button>
-                            </div>
+                            <input type="file" id="resumeFile" class="hidden" onchange="uploadDoc('resume')">
+                            <button onclick="document.getElementById('resumeFile').click()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-3.5 py-2 rounded-xl transition">อัปโหลดไฟล์</button>
                         </div>
-
-                        <!-- Doc 2 -->
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                            <div class="flex items-center space-x-3">
-                                <i class="fa-solid fa-file-pdf text-rose-500 text-2xl"></i>
-                                <div>
-                                    <p class="font-medium text-slate-700">2. ใบแสดงผลการเรียน (Transcript) <span class="text-rose-500">*จำเป็น</span></p>
-                                    <p class="text-xs text-slate-400" id="transcriptStatus">สถานะ: <span class="text-amber-600 font-medium">ยังไม่อัปโหลด</span></p>
-                                </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-slate-700">2. ใบแสดงผลการเรียน (Transcript)</p>
+                                <p class="text-xs text-slate-400" id="transcriptStatusText">สถานะ: <span class="text-amber-600 font-medium">ยังไม่อัปโหลด</span></p>
                             </div>
                             <input type="file" id="transcriptFile" class="hidden" onchange="uploadDoc('transcript')">
-                            <button onclick="document.getElementById('transcriptFile').click()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg transition">อัปโหลดไฟล์</button>
+                            <button onclick="document.getElementById('transcriptFile').click()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-3.5 py-2 rounded-xl transition">อัปโหลดไฟล์</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB: ติดตามสถานะ (ระบบจริง) -->
+                <!-- TAB 4: ติดตามสถานะ (แสดงผลแบบ Dynamic Real-time) -->
                 <div id="studentContent-status" class="student-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
-                    <div class="border-b border-slate-100 pb-4">
-                        <h3 class="text-base font-semibold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-timeline text-sky-500"></i>
-                            ติดตามสถานะการขอฝึกงาน
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">ระบบติดตามผลการดำเนินการยื่นคำร้องแบบเรียลไทม์</p>
+                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-timeline text-sky-500"></i> ติดตามสถานะการขอฝึกงาน
+                    </h3>
+
+                    <!-- Dynamic Card -->
+                    <div id="statusDetailsCard" class="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+                        <!-- Content dynamically rendered -->
                     </div>
 
-                    <!-- Submitted Data Display Box -->
-                    <div id="statusDataBox" class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2">
-                        <!-- Filled dynamically -->
-                    </div>
-
-                    <!-- Real Timeline Stepper -->
-                    <div class="relative py-4">
+                    <!-- Progress Stepper Track -->
+                    <div id="progressStepper" class="py-4 hidden">
                         <div class="grid grid-cols-4 gap-2 text-center text-xs">
-                            <!-- Step 1 -->
                             <div class="flex flex-col items-center space-y-2">
-                                <div id="step1Icon" class="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold">
-                                    1
-                                </div>
-                                <span class="font-medium text-slate-700">1. ยื่นคำร้องแล้ว</span>
-                                <span class="text-[10px] text-slate-400" id="step1Date">-</span>
+                                <div id="stStep1" class="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold">1</div>
+                                <span class="font-medium text-slate-700">1. ยื่นคำร้อง</span>
                             </div>
-                            <!-- Step 2 -->
                             <div class="flex flex-col items-center space-y-2">
-                                <div id="step2Icon" class="w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center font-bold">
-                                    2
-                                </div>
-                                <span class="font-medium text-slate-400">2. หัวหน้าสาขาตรวจสอบ</span>
-                                <span class="text-[10px] text-slate-400">รอตรวจสอบ</span>
+                                <div id="stStep2" class="w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center font-bold">2</div>
+                                <span class="font-medium text-slate-400">2. เจ้าหน้าที่ตรวจสอบ</span>
                             </div>
-                            <!-- Step 3 -->
                             <div class="flex flex-col items-center space-y-2">
-                                <div id="step3Icon" class="w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center font-bold">
-                                    3
-                                </div>
-                                <span class="font-medium text-slate-400">3. ผู้อำนวยการลงนาม</span>
-                                <span class="text-[10px] text-slate-400">รอดำเนินการ</span>
+                                <div id="stStep3" class="w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center font-bold">3</div>
+                                <span class="font-medium text-slate-400">3. หัวหน้าสาขาอนุมัติ</span>
                             </div>
-                            <!-- Step 4 -->
                             <div class="flex flex-col items-center space-y-2">
-                                <div id="step4Icon" class="w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center font-bold">
-                                    4
-                                </div>
-                                <span class="font-medium text-slate-400">4. ออกหนังสือส่งตัว</span>
-                                <span class="text-[10px] text-slate-400">รอดำเนินการ</span>
+                                <div id="stStep4" class="w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center font-bold">4</div>
+                                <span class="font-medium text-slate-400">4. ผอ. ลงนามส่งตัว</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <div id="statusNoticeBox" class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-xs text-amber-800 space-y-1">
-                        <p class="font-semibold flex items-center gap-1.5">
-                            <i class="fa-solid fa-clock"></i> สถานะปัจจุบัน: ยื่นคำร้องสำเร็จแล้ว อยู่ระหว่างรอหัวหน้าสาขาวิชาตรวจสอบเอกสาร
-                        </p>
-                    </div>
-                </div>
-
-                <!-- TAB: ส่ง Logbook -->
-                <div id="studentContent-logbook" class="student-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                        <div>
-                            <h3 class="text-base font-semibold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-book-bookmark text-sky-500"></i>
-                                บันทึกการฝึกงานประจำสัปดาห์ (Logbook)
-                            </h3>
-                            <p class="text-xs text-slate-400 mt-0.5">ส่งใบบันทึกการทำงานเพื่อให้อาจารย์นิเทศก์ตรวจสอบ</p>
-                        </div>
-                        <button onclick="openLogbookModal()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 font-medium">
-                            <i class="fa-solid fa-plus"></i> เพิ่มบันทึกสัปดาห์นี้
-                        </button>
-                    </div>
-
-                    <div id="logbookListContainer" class="space-y-3">
-                        <!-- Dynamic Logbooks -->
-                    </div>
-                </div>
-
-                <!-- TAB: ดูผลประเมิน -->
-                <div id="studentContent-evaluation" class="student-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
-                    <div class="border-b border-slate-100 pb-4">
-                        <h3 class="text-base font-semibold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-square-poll-vertical text-sky-500"></i>
-                            ผลการประเมินการปฏิบัติงานสหกิจศึกษา
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">คะแนนสรุปจากสถานประกอบการและอาจารย์นิเทศก์</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                            <p class="text-xs text-slate-400 mb-1">คะแนนจากสถานประกอบการ</p>
-                            <p class="text-3xl font-bold text-sky-600">- <span class="text-sm font-normal text-slate-400">/ 50</span></p>
-                        </div>
-                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                            <p class="text-xs text-slate-400 mb-1">คะแนนจากอาจารย์นิเทศก์</p>
-                            <p class="text-3xl font-bold text-indigo-600">- <span class="text-sm font-normal text-slate-400">/ 50</span></p>
-                        </div>
-                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                            <p class="text-xs text-slate-400 mb-1">เกรดประเมินรวม (Grade)</p>
-                            <p class="text-3xl font-bold text-slate-400">รอประเมิน</p>
                         </div>
                     </div>
                 </div>
-
             </div>
 
-            <!-- ADMIN / OFFICER VIEW -->
-            <div id="adminManagementView" class="hidden space-y-8">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                        <h2 class="text-2xl font-semibold text-slate-800">จัดการข้อมูลนักศึกษาและสาขาวิชา</h2>
-                        <p class="text-sm text-slate-500 mt-1">อัปโหลดไฟล์ นำเข้าข้อมูล และจัดการสาขาวิชาทั้งหมดในระบบ</p>
+
+            <!-- OFFICER VIEW -->
+            <div id="officerPortalView" class="hidden space-y-6">
+                <!-- Officer Navigation Tabs -->
+                <div class="flex border-b border-slate-200 overflow-x-auto space-x-2 text-sm font-medium">
+                    <button onclick="switchOfficerTab('requests')" id="otab-requests" class="officer-nav-tab py-2.5 px-4 text-sky-600 border-b-2 border-sky-500 whitespace-nowrap flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check"></i> 1. ตรวจสอบคำร้อง & ออกหนังสือ
+                    </button>
+                    <button onclick="switchOfficerTab('companies')" id="otab-companies" class="officer-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
+                        <i class="fa-solid fa-building"></i> 4. จัดการข้อมูลบริษัท
+                    </button>
+                    <button onclick="switchOfficerTab('users')" id="otab-users" class="officer-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
+                        <i class="fa-solid fa-users-gear"></i> 5. จัดการผู้ใช้งาน
+                    </button>
+                    <button onclick="switchOfficerTab('reports')" id="otab-reports" class="officer-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
+                        <i class="fa-solid fa-file-export"></i> 6. ออกรายงาน
+                    </button>
+                </div>
+
+                <!-- OFFICER TAB 1 & 2 & 3 -->
+                <div id="officerContent-requests" class="officer-tab-content bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 class="text-base font-semibold text-slate-800">คำร้องขอฝึกงานที่ยื่นเข้ามาในระบบ</h3>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="openDepartmentManager()" class="inline-flex items-center space-x-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 px-4 py-2.5 rounded-xl transition font-medium text-sm">
-                            <i class="fa-solid fa-layer-group"></i>
-                            <span>จัดการสาขาวิชา (5 สาขา)</span>
-                        </button>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-xs text-slate-500 uppercase">
+                                    <th class="py-3 px-4">รหัสนักศึกษา</th>
+                                    <th class="py-3 px-4">ชื่อ - นามสกุล</th>
+                                    <th class="py-3 px-4">สาขาวิชา</th>
+                                    <th class="py-3 px-4">บริษัท</th>
+                                    <th class="py-3 px-4">สถานะคำร้อง</th>
+                                    <th class="py-3 px-4 text-right">การจัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="officerTableBody" class="divide-y divide-slate-100 text-slate-600">
+                                <!-- Dynamic Render -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Student Data Table Container -->
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="relative flex-1 max-w-md">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <input type="text" id="searchInput" onkeyup="filterStudents()" placeholder="ค้นหาด้วยชื่อ, รหัสนักศึกษา, หรือสาขา..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400">
+                <!-- OFFICER TAB 4: บริษัท -->
+                <div id="officerContent-companies" class="officer-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 class="text-base font-semibold text-slate-800">จัดการข้อมูลสถานประกอบการ / บริษัท</h3>
+                        <button onclick="openAddCompanyModal()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-3.5 py-2 rounded-xl font-medium">
+                            <i class="fa-solid fa-plus mr-1"></i>เพิ่มบริษัทใหม่
+                        </button>
+                    </div>
+                    <div id="companyListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <!-- Dynamic Companies -->
+                    </div>
+                </div>
+
+                <!-- OFFICER TAB 5: ผู้ใช้ -->
+                <div id="officerContent-users" class="officer-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
+                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3">จัดการสิทธิ์และผู้ใช้งานระบบ</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="p-3 bg-slate-50 rounded-xl flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-slate-800">นายสมชาย เข็มกลัด (65011234)</p>
+                                <p class="text-xs text-slate-400">บทบาท: นักศึกษา</p>
+                            </div>
+                            <span class="text-xs bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full">เปิดใช้งาน</span>
                         </div>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    <th class="py-3.5 px-6">รหัสนักศึกษา</th>
-                                    <th class="py-3.5 px-6">ชื่อ - นามสกุล</th>
-                                    <th class="py-3.5 px-6">สาขาวิชา</th>
-                                    <th class="py-3.5 px-6">สถานะ</th>
-                                    <th class="py-3.5 px-6 text-right">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentTableBody" class="divide-y divide-slate-100 text-sm text-slate-600">
-                            </tbody>
-                        </table>
+                </div>
+
+                <!-- OFFICER TAB 6: ออกรายงาน -->
+                <div id="officerContent-reports" class="officer-tab-content hidden bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
+                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3">ออกรายงานสรุปและสถิติ</h3>
+                    <div class="p-4 border border-slate-200 rounded-xl max-w-sm">
+                        <i class="fa-solid fa-file-pdf text-rose-500 text-2xl mb-2"></i>
+                        <h4 class="font-medium text-slate-800 text-sm">รายงานสรุปคำร้องขอฝึกงาน</h4>
+                        <p class="text-xs text-slate-400 mt-1 mb-3">ออกรายงาน PDF ตามคำร้องที่ยื่นเข้ามา</p>
+                        <button onclick="showToast('กำลังดาวน์โหลดรายงาน PDF...')" class="bg-sky-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium">ดาวน์โหลด PDF</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- HEAD OF DEPARTMENT VIEW -->
+            <div id="headPortalView" class="hidden space-y-6">
+                <!-- Head Dashboard Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-xs text-slate-400">คำร้องทั้งหมดในสาขา</p>
+                        <p class="text-2xl font-bold text-slate-800 mt-1" id="headTotalCount">0 รายการ</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-xs text-amber-600">รอหัวหน้าสาขาอนุมัติ</p>
+                        <p class="text-2xl font-bold text-amber-600 mt-1" id="headPendingCount">0 รายการ</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-xs text-emerald-600">อนุมัติแล้ว</p>
+                        <p class="text-2xl font-bold text-emerald-600 mt-1" id="headApprovedCount">0 รายการ</p>
+                    </div>
+                </div>
+
+                <!-- Approval Card List -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
+                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3">คำร้องขอฝึกงานที่รอการพิจารณาอนุมัติ</h3>
+                    <div id="headRequestCards" class="space-y-3">
+                        <!-- Dynamic Render -->
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- DIRECTOR VIEW -->
+            <div id="directorPortalView" class="hidden space-y-6">
+                <!-- Director Dashboard -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-xs text-slate-400">คำร้องรวมทุกสาขา</p>
+                        <p class="text-2xl font-bold text-slate-800 mt-1" id="directorTotalCount">0 รายการ</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-xs text-purple-600">รอผู้อำนวยการลงนาม</p>
+                        <p class="text-2xl font-bold text-purple-600 mt-1" id="directorPendingCount">0 รายการ</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-xs text-emerald-600">ลงนามสำเร็จแล้ว</p>
+                        <p class="text-2xl font-bold text-emerald-600 mt-1" id="directorSignedCount">0 รายการ</p>
+                    </div>
+                </div>
+
+                <!-- Final E-Signature Card -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
+                    <h3 class="text-base font-semibold text-slate-800 border-b pb-3">หนังสือส่งตัวรอการลงนามอิเล็กทรอนิกส์ (E-Signature)</h3>
+                    <div id="directorEsignCards" class="space-y-3">
+                        <!-- Dynamic Render -->
                     </div>
                 </div>
             </div>
@@ -450,92 +401,61 @@
         </main>
     </div>
 
-    <!-- LOGBOOK MODAL -->
-    <div id="logbookModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <!-- Modal for Sending Back Revision -->
+    <div id="sendBackModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
-            <button onclick="closeLogbookModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+            <button onclick="closeSendBackModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
-            <h3 class="text-base font-semibold text-slate-800 mb-4">เพิ่มบันทึกการฝึกงานประจำสัปดาห์</h3>
-            <form onsubmit="saveLogbook(event)" class="space-y-3 text-sm">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">ระบุสัปดาห์ที่</label>
-                    <input type="text" id="logWeek" required placeholder="เช่น สัปดาห์ที่ 1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">รายละเอียดงานที่ได้ปฏิบัติ</label>
-                    <textarea id="logDetail" required rows="3" placeholder="อธิบายกิจกรรมและสิ่งที่ได้เรียนรู้ในสัปดาห์นี้..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700"></textarea>
-                </div>
-                <div class="text-right pt-2">
-                    <button type="submit" class="bg-sky-500 text-white text-xs px-4 py-2 rounded-xl">บันทึก Logbook</button>
-                </div>
-            </form>
+            <h3 class="text-base font-semibold text-slate-800 mb-2">ส่งกลับคำร้องให้แก้ไข</h3>
+            <p class="text-xs text-slate-400 mb-4">ระบุข้อผิดพลาดหรือสิ่งที่นักศึกษาต้องแก้ไขเพิ่มเติม</p>
+            <textarea id="sendBackReason" rows="3" placeholder="ระบุเหตุผลในการส่งกลับแก้ไข..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:outline-none focus:ring-2 focus:ring-sky-200"></textarea>
+            <div class="text-right mt-3">
+                <button onclick="confirmSendBack()" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-4 py-2 rounded-xl">ยืนยันส่งกลับ</button>
+            </div>
         </div>
     </div>
 
-    <!-- Notification Toast -->
+    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 right-5 hidden bg-slate-800 text-white text-sm px-4 py-3 rounded-xl shadow-lg transition-all flex items-center space-x-2 z-50">
         <i class="fa-solid fa-circle-check text-emerald-400"></i>
         <span id="toastMessage">ดำเนินการสำเร็จ</span>
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- Global Application Dynamic Store & Logic -->
     <script>
-        // 5 Major Departments Master List
-        let departments = [
-            "การบัญชี",
-            "การตลาดดิจิทัล",
-            "เทคโนโลยีธุรกิจดิจิทัล",
-            "ช่างไฟฟ้า",
-            "ช่างยนต์"
-        ];
+        // Department Master List
+        const departments = ["การบัญชี", "การตลาดดิจิทัล", "เทคโนโลยีธุรกิจดิจิทัล", "ช่างไฟฟ้า", "ช่างยนต์"];
+        
+        // GLOBAL DYNAMIC SYSTEM STATE (เริ่มต้นด้วยความว่างเปล่า เพื่อให้อาจารย์ทดสอบยื่นจริง)
+        let systemData = {
+            studentProfile: {
+                id: "65011234",
+                name: "นายสมชาย เข็มกลัด",
+                major: "เทคโนโลยีธุรกิจดิจิทัล",
+                phone: "081-234-5678",
+                resumeUploaded: false,
+                transcriptUploaded: false
+            },
+            companies: [
+                { name: "บริษัท นวัตกรรมซอฟต์แวร์ จำกัด", contact: "คุณวิชัย (02-123-4567)" },
+                { name: "บริษัท เทคโนโลยีไฟฟ้าไทย จำกัด", contact: "คุณสมพร (089-111-2222)" }
+            ],
+            // Request Store: null initially until student submits
+            activeRequest: null 
+        };
 
-        let studentData = [
-            { id: "65011234", name: "นายสมชาย เข็มกลัด", major: "เทคโนโลยีธุรกิจดิจิทัล", status: "กำลังฝึกงาน" },
-            { id: "65011289", name: "นางสาวใจดี รักเรียน", major: "การบัญชี", status: "รอการตอบรับ" },
-            { id: "65011301", name: "นายกิตติศักดิ์ มีสุข", major: "ช่างไฟฟ้า", status: "กำลังฝึกงาน" }
-        ];
-
-        let activeRequestData = null; // Real Submitted Request Data
         let selectedRole = 'student';
 
         const roleConfig = {
-            student: {
-                title: "นักศึกษา",
-                name: "นายสมชาย เข็มกลัด",
-                desc: "รหัสนักศึกษา: 65011234 | สาขา: เทคโนโลยีธุรกิจดิจิทัล",
-                emoji: "🎓",
-                badgeBg: "bg-blue-400",
-                defaultUser: "65011234"
-            },
-            officer: {
-                title: "เจ้าหน้าที่",
-                name: "เจ้าหน้าที่สหกิจศึกษา",
-                desc: "สิทธิ์การเข้าถึง: นำเข้าไฟล์ข้อมูลนักศึกษา และ จัดการสาขาวิชา",
-                emoji: "💼",
-                badgeBg: "bg-emerald-400",
-                defaultUser: "officer_coop"
-            },
-            head: {
-                title: "หัวหน้าสาขาวิชา",
-                name: "ดร.สมเกียรติ วิชาการ (หัวหน้าสาขา)",
-                desc: "สิทธิ์การเข้าถึง: พินิจพิจารณา และอนุมัติคำร้องขอฝึกงานของนักศึกษาในสาขา",
-                emoji: "👔",
-                badgeBg: "bg-amber-400",
-                defaultUser: "head_cs"
-            },
-            director: {
-                title: "ผู้อำนวยการ",
-                name: "ผศ.ดร.วิชัย บัญชาการ (ผู้อำนวยการ)",
-                desc: "สิทธิ์การเข้าถึง: ดูภาพรวมสถิติฝึกงานของทุกสาขา อนุมัติขั้นสุดท้าย",
-                emoji: "🏛️",
-                badgeBg: "bg-purple-400",
-                defaultUser: "director_coop"
-            }
+            student: { title: "นักศึกษา", name: "นายสมชาย เข็มกลัด", desc: "รหัสนักศึกษา: 65011234 | สาขา: เทคโนโลยีธุรกิจดิจิทัล", emoji: "🎓", badgeBg: "bg-blue-400", defaultUser: "65011234" },
+            officer: { title: "เจ้าหน้าที่", name: "เจ้าหน้าที่สหกิจศึกษา", desc: "สิทธิ์การเข้าถึง: ตรวจสอบคำร้อง ออกหนังสือ จัดการบริษัท/ผู้ใช้งาน และออกรายงาน", emoji: "💼", badgeBg: "bg-emerald-400", defaultUser: "officer_coop" },
+            head: { title: "หัวหน้าสาขาวิชา", name: "ดร.สมเกียรติ วิชาการ", desc: "สิทธิ์การเข้าถึง: ตรวจสอบคำร้อง อนุมัติ/ไม่อนุมัติ และดู Dashboard สถิติสาขา", emoji: "👔", badgeBg: "bg-amber-400", defaultUser: "head_cs" },
+            director: { title: "ผู้อำนวยการ", name: "ผศ.ดร.วิชัย บัญชาการ", desc: "สิทธิ์การเข้าถึง: อนุมัติขั้นสุดท้าย ลงนามอิเล็กทรอนิกส์ (E-Signature) และดูภาพรวม", emoji: "🏛️", badgeBg: "bg-purple-400", defaultUser: "director_coop" }
         };
 
-        // Populate Select Dropdowns with Departments
-        function populateDepartmentDropdowns() {
+        // Populate Select Options
+        function initDropdowns() {
             const studentSelect = document.getElementById('studentMajorSelect');
             const requestSelect = document.getElementById('requestMajorSelect');
 
@@ -547,7 +467,8 @@
                 requestSelect.innerHTML += `<option value="${dept}">${dept}</option>`;
             });
 
-            studentSelect.value = "เทคโนโลยีธุรกิจดิจิทัล";
+            studentSelect.value = systemData.studentProfile.major;
+            requestSelect.value = systemData.studentProfile.major;
         }
 
         function selectLoginRole(roleKey) {
@@ -582,20 +503,30 @@
             document.getElementById('roleEmoji').innerText = config.emoji;
             document.getElementById('roleBadgeIcon').className = `w-2.5 h-2.5 rounded-full ${config.badgeBg}`;
 
-            const adminView = document.getElementById('adminManagementView');
-            const studentView = document.getElementById('studentSelfView');
+            // Hide Views
+            document.getElementById('studentSelfView').classList.add('hidden');
+            document.getElementById('officerPortalView').classList.add('hidden');
+            document.getElementById('headPortalView').classList.add('hidden');
+            document.getElementById('directorPortalView').classList.add('hidden');
 
+            // Render Views Dynamically based on current Store
             if (roleKey === 'student') {
-                adminView.classList.add('hidden');
-                studentView.classList.remove('hidden');
-                updateStatusUI();
-            } else {
-                adminView.classList.remove('hidden');
-                studentView.classList.add('hidden');
-                renderTable(studentData);
+                document.getElementById('studentSelfView').classList.remove('hidden');
+                renderStudentStatus();
+            } else if (roleKey === 'officer') {
+                document.getElementById('officerPortalView').classList.remove('hidden');
+                renderOfficerTable();
+                renderCompanies();
+            } else if (roleKey === 'head') {
+                document.getElementById('headPortalView').classList.remove('hidden');
+                renderHeadView();
+            } else if (roleKey === 'director') {
+                document.getElementById('directorPortalView').classList.remove('hidden');
+                renderDirectorView();
             }
         }
 
+        // --- STUDENT FUNCTIONS ---
         function switchStudentTab(tabKey) {
             document.querySelectorAll('.student-nav-tab').forEach(tab => {
                 tab.className = 'student-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2';
@@ -603,135 +534,344 @@
             document.querySelectorAll('.student-tab-content').forEach(content => {
                 content.classList.add('hidden');
             });
-
-            const activeTab = document.getElementById(`stab-${tabKey}`);
-            activeTab.className = 'student-nav-tab py-2.5 px-4 text-sky-600 border-b-2 border-sky-500 font-medium whitespace-nowrap flex items-center gap-2';
-
+            document.getElementById(`stab-${tabKey}`).className = 'student-nav-tab py-2.5 px-4 text-sky-600 border-b-2 border-sky-500 font-medium whitespace-nowrap flex items-center gap-2';
             document.getElementById(`studentContent-${tabKey}`).classList.remove('hidden');
         }
 
-        // Student Actions
         function saveProfile(event) {
             event.preventDefault();
-            const chosenMajor = document.getElementById('studentMajorSelect').value;
-            document.getElementById('roleDescription').innerText = `รหัสนักศึกษา: 65011234 | สาขา: ${chosenMajor}`;
-            showToast('อัปเดตข้อมูลส่วนตัวและสาขาวิชาเรียบร้อย');
+            systemData.studentProfile.name = document.getElementById('studentNameInput').value;
+            systemData.studentProfile.major = document.getElementById('studentMajorSelect').value;
+            systemData.studentProfile.phone = document.getElementById('studentPhoneInput').value;
+
+            document.getElementById('userGreetingName').innerText = systemData.studentProfile.name;
+            document.getElementById('roleDescription').innerText = `รหัสนักศึกษา: 65011234 | สาขา: ${systemData.studentProfile.major}`;
+            showToast('บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว');
         }
 
-        // REAL Request Submission Function
-        function submitRequest(event) {
-            event.preventDefault();
-            
-            const company = document.getElementById('reqCompany').value;
-            const position = document.getElementById('reqPosition').value;
-            const major = document.getElementById('requestMajorSelect').value;
-            const startDate = document.getElementById('reqStartDate').value;
-            const endDate = document.getElementById('reqEndDate').value;
-
-            // Save actual request
-            activeRequestData = {
-                company: company,
-                position: position,
-                major: major,
-                startDate: startDate,
-                endDate: endDate,
-                submittedAt: new Date().toLocaleDateString('th-TH')
-            };
-
-            showToast('ยื่นคำร้องขอฝึกงานสำเร็จ!');
-            updateStatusUI();
-            switchStudentTab('status');
-        }
-
-        // Update Real Status UI
-        function updateStatusUI() {
-            const box = document.getElementById('statusDataBox');
-            const dateSpan = document.getElementById('step1Date');
-
-            if (!activeRequestData) {
-                box.innerHTML = `
-                    <div class="text-center py-4 text-slate-400">
-                        <i class="fa-solid fa-file-circle-exclamation text-2xl mb-1"></i>
-                        <p>ท่านยังไม่ได้ยื่นคำร้องขอฝึกงาน</p>
-                        <p class="text-[11px] mt-1">โปรดไปที่แท็บ "ยื่นคำร้องฝึกงาน" เพื่อกรอกข้อมูล</p>
-                    </div>
-                `;
-                dateSpan.innerText = "ยังไม่ยื่นเรื่อง";
-            } else {
-                box.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-700">
-                        <div><span class="text-slate-400">สถานประกอบการ:</span> <strong>${activeRequestData.company}</strong></div>
-                        <div><span class="text-slate-400">ตำแหน่งงาน:</span> <strong>${activeRequestData.position}</strong></div>
-                        <div><span class="text-slate-400">สาขาวิชา:</span> ${activeRequestData.major}</div>
-                        <div><span class="text-slate-400">วันที่ยื่นเรื่อง:</span> ${activeRequestData.submittedAt}</div>
-                    </div>
-                `;
-                dateSpan.innerText = activeRequestData.submittedAt;
-            }
-        }
-
-        // Document Upload Handlers
         function uploadDoc(type) {
-            if (type === 'resume') {
-                document.getElementById('resumeStatus').innerHTML = 'สถานะ: <span class="text-emerald-600 font-medium">อัปโหลดเรียบร้อยแล้ว</span>';
+            if(type === 'resume') {
+                systemData.studentProfile.resumeUploaded = true;
+                document.getElementById('resumeStatusText').innerHTML = 'สถานะ: <span class="text-emerald-600 font-medium">อัปโหลดเรียบร้อยแล้ว (resume.pdf)</span>';
             } else {
-                document.getElementById('transcriptStatus').innerHTML = 'สถานะ: <span class="text-emerald-600 font-medium">อัปโหลดเรียบร้อยแล้ว</span>';
+                systemData.studentProfile.transcriptUploaded = true;
+                document.getElementById('transcriptStatusText').innerHTML = 'สถานะ: <span class="text-emerald-600 font-medium">อัปโหลดเรียบร้อยแล้ว (transcript.pdf)</span>';
             }
             showToast('อัปโหลดไฟล์เอกสารสำเร็จ');
         }
 
-        // Logbook Modal Controls
-        function openLogbookModal() {
-            document.getElementById('logbookModal').classList.remove('hidden');
-            document.getElementById('logbookModal').classList.add('flex');
-        }
-
-        function closeLogbookModal() {
-            document.getElementById('logbookModal').classList.add('hidden');
-            document.getElementById('logbookModal').classList.remove('flex');
-        }
-
-        function saveLogbook(event) {
+        // SUBMIT REQUEST (STEP 1: นักศึกษายื่นคำร้อง)
+        function submitRequest(event) {
             event.preventDefault();
-            const week = document.getElementById('logWeek').value;
-            const detail = document.getElementById('logDetail').value;
+            const major = document.getElementById('requestMajorSelect').value;
+            const position = document.getElementById('reqPosition').value;
+            const company = document.getElementById('reqCompany').value;
 
-            const container = document.getElementById('logbookListContainer');
-            container.innerHTML += `
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-slate-700">${week}</p>
-                        <p class="text-xs text-slate-500 mt-1">${detail}</p>
+            systemData.activeRequest = {
+                studentId: systemData.studentProfile.id,
+                studentName: systemData.studentProfile.name,
+                major: major,
+                position: position,
+                company: company,
+                status: 'submitted', // submitted -> officer_checked -> head_approved / head_rejected -> director_signed
+                submittedAt: new Date().toLocaleDateString('th-TH'),
+                note: ''
+            };
+
+            showToast('ยื่นคำร้องฝึกงานสำเร็จ! ข้อมูลถูกบันทึกเข้าสู่ระบบ');
+            switchStudentTab('status');
+            renderStudentStatus();
+        }
+
+        // Render Student Status Dashboard
+        function renderStudentStatus() {
+            const card = document.getElementById('statusDetailsCard');
+            const stepper = document.getElementById('progressStepper');
+            const req = systemData.activeRequest;
+
+            if (!req) {
+                card.innerHTML = `
+                    <div class="text-center py-6 text-slate-400">
+                        <i class="fa-solid fa-file-circle-exclamation text-3xl mb-2 text-slate-300"></i>
+                        <p class="font-medium text-sm">ยังไม่มีข้อมูลคำร้องฝึกงานในระบบ</p>
+                        <p class="text-[11px] mt-1">โปรดไปที่แท็บ "2. ยื่นคำร้องฝึกงาน" เพื่อเริ่มต้นยื่นเรื่องให้อาจารย์และเจ้าหน้าที่ตรวจสอบ</p>
                     </div>
-                    <span class="text-xs bg-amber-50 text-amber-600 font-medium px-2.5 py-1 rounded-full">รอการตรวจ</span>
+                `;
+                stepper.classList.add('hidden');
+                return;
+            }
+
+            stepper.classList.remove('hidden');
+
+            let statusBadge = '';
+            let noticeText = '';
+
+            if (req.status === 'submitted') {
+                statusBadge = '<span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-medium">ยื่นคำร้องแล้ว (รอเจ้าหน้าที่ตรวจสอบ)</span>';
+                noticeText = 'คำร้องส่งเรียบร้อยแล้ว อยู่ระหว่างเจ้าหน้าที่สหกิจศึกษาตรวจสอบเอกสาร';
+                setStepperActive(1);
+            } else if (req.status === 'officer_checked') {
+                statusBadge = '<span class="bg-sky-100 text-sky-800 px-2.5 py-1 rounded-full text-xs font-medium">เจ้าหน้าที่ตรวจสอบแล้ว (รอหัวหน้าสาขาอนุมัติ)</span>';
+                noticeText = 'เจ้าหน้าที่ออกหนังสือขอความอนุเคราะห์แล้ว อยู่ระหว่างเสนอหัวหน้าสาขาวิชาพิจารณาอนุมัติ';
+                setStepperActive(2);
+            } else if (req.status === 'head_approved') {
+                statusBadge = '<span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-full text-xs font-medium">หัวหน้าสาขาอนุมัติแล้ว (รอ ผอ. ลงนาม)</span>';
+                noticeText = 'หัวหน้าสาขาวิชาอนุมัติคำร้องแล้ว อยู่ระหว่างเสนอผู้อำนวยการลงนามอิเล็กทรอนิกส์ (E-Signature)';
+                setStepperActive(3);
+            } else if (req.status === 'head_rejected') {
+                statusBadge = '<span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full text-xs font-medium">ไม่อนุมัติ</span>';
+                noticeText = `คำร้องถูกปฏิเสธเนื่องจาก: ${req.note || 'เอกสารไม่สมบูรณ์'}`;
+                setStepperActive(0);
+            } else if (req.status === 'director_signed') {
+                statusBadge = '<span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-xs font-medium">เสร็จสิ้น (ออกหนังสือส่งตัวเรียบร้อย)</span>';
+                noticeText = 'ผู้อำนวยการลงนามเรียบร้อยแล้ว! นักศึกษาสามารถติดต่อขอรับหนังสือส่งตัวได้ที่สำนักงานสหกิจศึกษา';
+                setStepperActive(4);
+            } else if (req.status === 'sent_back') {
+                statusBadge = '<span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full text-xs font-medium">ส่งกลับแก้ไข</span>';
+                noticeText = `คำร้องถูกส่งกลับให้แก้ไขเนื่องจาก: ${req.note || 'โปรดตรวจสอบเอกสาร'}`;
+                setStepperActive(1);
+            }
+
+            card.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-3 gap-2">
+                        <div>
+                            <p class="text-sm font-semibold text-slate-800">${req.company}</p>
+                            <p class="text-slate-500 mt-0.5">ตำแหน่งงาน: ${req.position} | สาขา: ${req.major}</p>
+                        </div>
+                        <div>${statusBadge}</div>
+                    </div>
+                    <div class="text-slate-500 flex items-center justify-between">
+                        <span>วันที่ยื่นเรื่อง: ${req.submittedAt}</span>
+                        <span class="text-sky-600 font-medium"><i class="fa-solid fa-circle-info mr-1"></i>${noticeText}</span>
+                    </div>
                 </div>
             `;
-            closeLogbookModal();
-            showToast('บันทึก Logbook สำเร็จ');
         }
 
-        // Department Management
-        function openDepartmentManager() {
-            alert("สาขาวิชาในปัจจุบัน (5 สาขา):\n1. การบัญชี\n2. การตลาดดิจิทัล\n3. เทคโนโลยีธุรกิจดิจิทัล\n4. ช่างไฟฟ้า\n5. ช่างยนต์");
+        function setStepperActive(stepNumber) {
+            for(let i = 1; i <= 4; i++) {
+                const el = document.getElementById(`stStep${i}`);
+                if(i < stepNumber) {
+                    el.className = "w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold";
+                    el.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else if(i === stepNumber) {
+                    el.className = "w-9 h-9 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold ring-4 ring-sky-100";
+                    el.innerText = i;
+                } else {
+                    el.className = "w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center font-bold";
+                    el.innerText = i;
+                }
+            }
         }
 
-        function renderTable(data) {
-            const tbody = document.getElementById('studentTableBody');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-            data.forEach(item => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/60 transition">
-                        <td class="py-4 px-6 font-medium text-slate-800">${item.id}</td>
-                        <td class="py-4 px-6">${item.name}</td>
-                        <td class="py-4 px-6">${item.major}</td>
-                        <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">${item.status}</span></td>
-                        <td class="py-4 px-6 text-right space-x-2">
-                            <button class="text-slate-400 hover:text-sky-600 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
-                        </td>
-                    </tr>
+        // --- OFFICER FUNCTIONS ---
+        function switchOfficerTab(tabKey) {
+            document.querySelectorAll('.officer-nav-tab').forEach(tab => {
+                tab.className = 'officer-nav-tab py-2.5 px-4 text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2';
+            });
+            document.querySelectorAll('.officer-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`otab-${tabKey}`).className = 'officer-nav-tab py-2.5 px-4 text-sky-600 border-b-2 border-sky-500 font-medium whitespace-nowrap flex items-center gap-2';
+            document.getElementById(`officerContent-${tabKey}`).classList.remove('hidden');
+        }
+
+        function renderOfficerTable() {
+            const tbody = document.getElementById('officerTableBody');
+            const req = systemData.activeRequest;
+
+            if(!req) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">ยังไม่มีนักศึกษายื่นคำร้องเข้ามาในระบบ</td></tr>`;
+                return;
+            }
+
+            let statusTxt = '';
+            if(req.status === 'submitted') statusTxt = '<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700">รอเจ้าหน้าที่ตรวจสอบ</span>';
+            else if(req.status === 'officer_checked') statusTxt = '<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-sky-50 text-sky-700">ออกหนังสือแล้ว (รอหัวหน้าสาขา)</span>';
+            else if(req.status === 'sent_back') statusTxt = '<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700">ส่งกลับแก้ไข</span>';
+            else statusTxt = `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">${req.status}</span>`;
+
+            tbody.innerHTML = `
+                <tr class="hover:bg-slate-50/60 transition">
+                    <td class="py-3.5 px-4 font-medium text-slate-800">${req.studentId}</td>
+                    <td class="py-3.5 px-4">${req.studentName}</td>
+                    <td class="py-3.5 px-4">${req.major}</td>
+                    <td class="py-3.5 px-4">${req.company}</td>
+                    <td class="py-3.5 px-4">${statusTxt}</td>
+                    <td class="py-3.5 px-4 text-right space-x-1">
+                        <button onclick="openSendBackModal()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs px-2.5 py-1.5 rounded-lg font-medium transition" title="ส่งกลับให้แก้ไข">
+                            <i class="fa-solid fa-rotate-left mr-1"></i>ส่งกลับแก้ไข
+                        </button>
+                        <button onclick="officerApproveRequest()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition" title="ออกหนังสือส่งตัว">
+                            <i class="fa-solid fa-file-contract mr-1"></i>ออกหนังสือ
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function officerApproveRequest() {
+            if(systemData.activeRequest) {
+                systemData.activeRequest.status = 'officer_checked';
+                renderOfficerTable();
+                showToast('ตรวจสอบและออกหนังสือส่งตัวเรียบร้อย ส่งเรื่องให้หัวหน้าสาขา');
+            }
+        }
+
+        function openSendBackModal() {
+            document.getElementById('sendBackModal').classList.remove('hidden');
+            document.getElementById('sendBackModal').classList.add('flex');
+        }
+
+        function closeSendBackModal() {
+            document.getElementById('sendBackModal').classList.add('hidden');
+            document.getElementById('sendBackModal').classList.remove('flex');
+        }
+
+        function confirmSendBack() {
+            const reason = document.getElementById('sendBackReason').value;
+            if(systemData.activeRequest) {
+                systemData.activeRequest.status = 'sent_back';
+                systemData.activeRequest.note = reason;
+                renderOfficerTable();
+            }
+            closeSendBackModal();
+            showToast('ส่งกลับคำร้องให้นักศึกษาแก้ไขเรียบร้อยแล้ว');
+        }
+
+        function renderCompanies() {
+            const container = document.getElementById('companyListContainer');
+            container.innerHTML = '';
+            systemData.companies.forEach(c => {
+                container.innerHTML += `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold text-slate-800">${c.name}</p>
+                            <p class="text-xs text-slate-500 mt-1">ผู้ติดต่อ: ${c.contact}</p>
+                        </div>
+                    </div>
                 `;
             });
+        }
+
+        function openAddCompanyModal() {
+            systemData.companies.push({ name: "บริษัท เพิ่มใหม่ จำกัด", contact: "คุณผู้ติดต่อ (02-000-0000)" });
+            renderCompanies();
+            showToast('เพิ่มข้อมูลบริษัทใหม่สำเร็จ');
+        }
+
+        // --- HEAD OF DEPARTMENT FUNCTIONS ---
+        function renderHeadView() {
+            const container = document.getElementById('headRequestCards');
+            const totalEl = document.getElementById('headTotalCount');
+            const pendingEl = document.getElementById('headPendingCount');
+            const approvedEl = document.getElementById('headApprovedCount');
+
+            const req = systemData.activeRequest;
+
+            if(!req || (req.status !== 'officer_checked' && req.status !== 'head_approved')) {
+                container.innerHTML = `<div class="text-center py-6 text-slate-400">ไม่มีรายการคำร้องที่รอหัวหน้าสาขาพิจารณาในขณะนี้</div>`;
+                totalEl.innerText = "0 รายการ";
+                pendingEl.innerText = "0 รายการ";
+                approvedEl.innerText = "0 รายการ";
+                return;
+            }
+
+            totalEl.innerText = "1 รายการ";
+            if(req.status === 'officer_checked') {
+                pendingEl.innerText = "1 รายการ";
+                approvedEl.innerText = "0 รายการ";
+                
+                container.innerHTML = `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <p class="text-sm font-semibold text-slate-800">${req.studentName} (รหัส ${req.studentId})</p>
+                            <p class="text-xs text-slate-500 mt-0.5">บริษัท: ${req.company} | ตำแหน่ง: ${req.position}</p>
+                            <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-check text-emerald-500 mr-1"></i>เจ้าหน้าที่ตรวจสอบและออกหนังสือคำร้องแล้ว</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="handleHeadDecision(false)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs px-3 py-2 rounded-xl font-medium transition">
+                                <i class="fa-solid fa-xmark mr-1"></i>ไม่อนุมัติ
+                            </button>
+                            <button onclick="handleHeadDecision(true)" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-4 py-2 rounded-xl font-medium transition shadow-sm">
+                                <i class="fa-solid fa-check mr-1"></i>อนุมัติคำร้อง
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                pendingEl.innerText = "0 รายการ";
+                approvedEl.innerText = "1 รายการ";
+                container.innerHTML = `<div class="text-center py-6 text-emerald-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>หัวหน้าสาขาอนุมัติคำร้องของ ${req.studentName} เรียบร้อยแล้ว (ส่งต่อ ผอ.)</div>`;
+            }
+        }
+
+        function handleHeadDecision(approved) {
+            if(systemData.activeRequest) {
+                if(approved) {
+                    systemData.activeRequest.status = 'head_approved';
+                    showToast('อนุมัติคำร้องเรียบร้อย ส่งเรื่องต่อให้ผู้อำนวยการลงนาม');
+                } else {
+                    systemData.activeRequest.status = 'head_rejected';
+                    showToast('ปฏิเสธคำร้องขอฝึกงานเรียบร้อย');
+                }
+                renderHeadView();
+            }
+        }
+
+        // --- DIRECTOR FUNCTIONS ---
+        function renderDirectorView() {
+            const container = document.getElementById('directorEsignCards');
+            const totalEl = document.getElementById('directorTotalCount');
+            const pendingEl = document.getElementById('directorPendingCount');
+            const signedEl = document.getElementById('directorSignedCount');
+
+            const req = systemData.activeRequest;
+
+            if(!req || (req.status !== 'head_approved' && req.status !== 'director_signed')) {
+                container.innerHTML = `<div class="text-center py-6 text-slate-400">ไม่มีหนังสือขอความอนุเคราะห์ที่รอลงนามในขณะนี้</div>`;
+                totalEl.innerText = "0 รายการ";
+                pendingEl.innerText = "0 รายการ";
+                signedEl.innerText = "0 รายการ";
+                return;
+            }
+
+            totalEl.innerText = "1 รายการ";
+            if(req.status === 'head_approved') {
+                pendingEl.innerText = "1 รายการ";
+                signedEl.innerText = "0 รายการ";
+
+                container.innerHTML = `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-lg font-bold">
+                                <i class="fa-solid fa-file-signature"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800">หนังสือขอความอนุเคราะห์ฝึกงาน - ${req.studentName}</p>
+                                <p class="text-xs text-slate-500">สาขา: ${req.major} | บริษัท ${req.company}</p>
+                                <span class="inline-block mt-1 text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded">ผ่านการอนุมัติจากหัวหน้าสาขาแล้ว</span>
+                            </div>
+                        </div>
+                        <button onclick="signDocEsignature()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-4 py-2.5 rounded-xl font-medium transition shadow-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-signature"></i> ลงนามอิเล็กทรอนิกส์ (E-Signature)
+                        </button>
+                    </div>
+                `;
+            } else {
+                pendingEl.innerText = "0 รายการ";
+                signedEl.innerText = "1 รายการ";
+                container.innerHTML = `<div class="text-center py-6 text-purple-700 font-medium"><i class="fa-solid fa-signature mr-1"></i>ลงนามอิเล็กทรอนิกส์เรียบร้อยแล้ว หนังสือส่งตัวสมบูรณ์</div>`;
+            }
+        }
+
+        function signDocEsignature() {
+            if(systemData.activeRequest) {
+                systemData.activeRequest.status = 'director_signed';
+                showToast('ลงนามอิเล็กทรอนิกส์ (E-Signature) ในหนังสือขอความอนุเคราะห์เรียบร้อย');
+                renderDirectorView();
+            }
         }
 
         function showToast(message) {
@@ -742,7 +882,7 @@
         }
 
         // Initialize Dropdowns
-        populateDepartmentDropdowns();
+        initDropdowns();
     </script>
 </body>
 </html>
